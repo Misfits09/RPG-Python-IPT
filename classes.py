@@ -1,3 +1,5 @@
+import random
+
 class joueur():
     alive = True
     F = None
