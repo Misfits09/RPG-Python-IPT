@@ -92,7 +92,7 @@ class classe():
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
         commlist = []
-        for fct in onturnresolve:
+        for fct in self.onturnresolve:
             commlist += fct(self)
         return commlist
     
