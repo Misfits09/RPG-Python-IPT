@@ -201,8 +201,10 @@ class guerrier(classe):
         if dtype == 'physique':
             target.removetargettrigger(self.protection)
             return True,([('mess',self.player.name+' bloque le coup')] + source.hit_attack(self,amount,dtype))
+    
+    #lancer un sort
     def spell (self,nomduspell):
-        return {'block':self.block , 'protect':self.protect}[nomduspell]()
+        return {'block':self.block , 'protect':self.protect , 'attaque':self.attack}[nomduspell]()
     
     #attaque de base
     def attack(self):
