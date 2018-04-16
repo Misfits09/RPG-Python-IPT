@@ -177,23 +177,30 @@ class guerrier(classe):
     speed = 50
     hp = pvMAX
     stamina = staminaMAX
+    help = [('block','réduit les dégâts physiques pendant un tour (40 Endurance)'),
+            ('protect','encaisse la prochaine attaque à la place de la cible (40 Endurance)'),
+            ('attack','attaque de base ('+str(att_cost)+' Endurance)')]
     
     #bloquer la prochaine attaque
-
-    def block(self): #dmgtrigger sur soit même
+    def block(self):
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de bloquer : Endurance à '+str(self.stamina))]
         self.stamina = 0
         self.adddmgtrigger(self.blocking)
+        self.addonturnresolve(self.removeblocking)
         return [('mess', self.player.name+' se prépare à bloquer')]
     def blocking(self,source,target,amount,dtype):
         if dtype == 'physique':
-            self.removedmgtrigger(self.blocking)
             return amount/2,[('mess',self.player.name+' bloque l\'attaque')]
+    def removeblocking(self):
+        self.removedmgtrigger(self.blocking)
+        self.removeonturnresolve(self.removeblocking)
     
     #prendre une attaque à la place de la cible
-    
-    def protect (self): #targettrigger sur une cible
+    def protect (self):
+        if self.stamina < 40 :
+            return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
+        self.stamina -= 40
         pl = findtarget()
         pl.addtargettrigger(self.protection)
         return [('mess',self.player.name+' protège '+pl.name)]
@@ -213,7 +220,7 @@ class guerrier(classe):
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         target = findtarget()
-        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
+        return self.attack_target(target,self.ad,'physique')
     
 class ninja(classe):
     name = 'ninja'
