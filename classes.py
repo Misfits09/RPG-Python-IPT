@@ -82,10 +82,10 @@ class classe():
     def addonturnresolve(self,function):
         self.onturnresolve.append(function)
     def removeonturnresolve(self,function):
-        self.hittrigger.remove(function)
+        self.onturnresolve.remove(function)
     def new_turn(self): #appelée à chaque début de tour du joueur
-        pass
-
+        for fct in onturnresolve:
+            fct(self)
     #ciblage d'attaque
     def attack_target(self,target,amount,dtype):
         commlist = []
