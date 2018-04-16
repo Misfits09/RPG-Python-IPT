@@ -47,13 +47,15 @@ def findtarget():
             if(pl.name.casefold().strip() == name and pl.alive):
                 plFound = True
                 print('\n  Vous ciblez '+pl.name)
-                return pl
+                return pl.class
         if (not plFound):
             print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
 
 class classe():
     def ___init__(self,joueur):
         self.player = joueur
+        self.adddmgtrigger(self.spikes)
+        self.addtargettrigger(self.dodge)
         
     targettrigger = []
     def addtargettrigger(self,function):
@@ -148,11 +150,24 @@ class classe():
             self.hp = 0
             return [self.player.F.isDead(self.player)]
         return commlist + [('mess',self.player.name+' a maintenant '+str(self.hp)+' PV')]
+    
+    #dégâts d'épine
+    def spikes(self,source,target,amount,dtype):
+        if dtype == 'physique':
+            return [('mess',source.player.name+' se blesse en attaquant')] +source.take_damage(self,self.spike,'physique')
+    
+    #esquive
+    def dodge(self,source,target,amount,dtype):
+        rd = random.randint(1,100)
+        if rd <= self.dodge:
+            return True,[('mess',self.player.name+' a esquivé l\'attaque')]
 
 class guerrier(classe):
     name = 'guerrier'
     spike = 10
+    dodge = 0
     armor = .25
+    resistance = .10
     ad = 25
     heal_points = 40
     att_cost = 30
@@ -180,7 +195,7 @@ class guerrier(classe):
     
     def protect (self): #targettrigger sur une cible
         pl = findtarget()
-        pl.classe.addtargettrigger(self.protection)
+        pl.addtargettrigger(self.protection)
         return [('mess',self.player.name+' protège '+pl.name)]
     def protection(self,source,target,amount,dtype):
         if dtype == 'physique':
@@ -201,7 +216,9 @@ class guerrier(classe):
 class ninja(classe):
     name = 'ninja'
     spike = 0
+    dodge = 20
     armor = 0
+    resistance = 0
     ad = 40
     heal_points = 15
     att_cost = 25
@@ -211,7 +228,6 @@ class ninja(classe):
     speed = 150
     hp = pvMAX
     stamina = staminaMAX
-    lastTurnHide = False
 
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
@@ -224,8 +240,7 @@ class ninja(classe):
         self.addonturnresolve(self.endHiding)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,target,amount,dtype):
-        if(dtype != 'zone'):
-            return True,['mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...']
+        return True,['mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...']
     def canHide(self):
         self.lastTurnHide = False
         return []
@@ -249,7 +264,9 @@ class ninja(classe):
 class mage_noir(classe):
     name = 'mage noir'
     spike = 0
+    dodge = 0
     armor = 0
+    resistance = .20
     ad = 60
     heal_points = 10
     att_cost = 50
@@ -263,7 +280,9 @@ class mage_noir(classe):
 class mage_blanc(classe):
     name = 'mage blanc'
     spike = 0
+    dodge = 0
     armor = .25
+    resistance = .30
     ad = 30
     heal_points = 40
     att_cost = 30
@@ -277,7 +296,9 @@ class mage_blanc(classe):
 class barbare(classe):
     name = 'barbare'
     spike = 15
+    dodge = 0
     armor = .15
+    resistance = 0
     ad = 35
     heal_points = 10
     att_cost = 30
@@ -291,7 +312,9 @@ class barbare(classe):
 class freelance(classe):
     name = 'freelance'
     spike = 0
-    armor = 0
+    dodge = 10
+    armor = .1
+    resistance = .1
     ad = 30
     heal_points = 30
     att_cost = 30
@@ -305,7 +328,9 @@ class freelance(classe):
 class barde(classe):
     name = 'barde'
     spike = 0
+    dodge = 10
     armor = .10
+    resistance = .15
     ad = 25
     heal_points = 20
     att_cost = 30
@@ -319,7 +344,9 @@ class barde(classe):
 class mage_rouge(classe):
     name = 'mage rouge'
     spike = 0
+    dodge = 0
     armor = 0
+    resistance = .10
     ad = 50
     heal_points = 30
     att_cost = 50
@@ -333,7 +360,9 @@ class mage_rouge(classe):
 class lancier(classe):
     name = 'lancier'
     spike = 0
+    dodge = 0
     armor = .20
+    resistance = .10
     ad = 40
     heal_points = 10
     att_cost = 30
