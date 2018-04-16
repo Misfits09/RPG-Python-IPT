@@ -181,7 +181,7 @@ class guerrier(classe):
             ('protect','encaisse la prochaine attaque à la place de la cible (40 Endurance)'),
             ('attack','attaque de base ('+str(att_cost)+' Endurance)')]
     
-    #bloquer la prochaine attaque
+    #bloquer la prochaine attaque (dmgtrigger sur soi)
     def block(self):
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de bloquer : Endurance à '+str(self.stamina))]
@@ -196,7 +196,7 @@ class guerrier(classe):
         self.removedmgtrigger(self.blocking)
         self.removeonturnresolve(self.removeblocking)
     
-    #prendre une attaque à la place de la cible
+    #prendre une attaque à la place de la cible (targettrigger sur cible)
     def protect (self):
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
@@ -220,7 +220,7 @@ class guerrier(classe):
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         target = findtarget()
-        return self.attack_target(target,self.ad,'physique')
+        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
 class ninja(classe):
     name = 'ninja'
