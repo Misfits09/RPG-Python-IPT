@@ -1,6 +1,7 @@
 import random
 
 class joueur():
+    classes = [guerrier,ninja,mage_blanc,mage_noir,mage_rouge,barbare,barde,freelance,lancier]
     alive = True
     F = None
     def __init__(self,i): #stat = [ad,att_cost,heal_points,heal_cost,pvMAX,staminaMAX]
@@ -288,8 +289,6 @@ class ninja(classe):
     def spell (self,nomduspell):
         return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive}[nomduspell]()
         
-    
-    
 class mage_noir(classe):
     name = 'mage noir'
     spike = 0
