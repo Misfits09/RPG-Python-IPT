@@ -196,7 +196,7 @@ class guerrier(classe):
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         target = findtarget()
-        return self.attack_target(target,self.ad,'physique')
+        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
 class ninja(classe):
     name = 'ninja'
@@ -211,21 +211,39 @@ class ninja(classe):
     speed = 150
     hp = pvMAX
     stamina = staminaMAX
+    lastTurnHide = False
 
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de se cacher : Endurance à '+str(self.stamina))]
         elif self.lastTurnHide :
-            return [('mess', self.player.name+' a encore voulu se cacher '+str(self.stamina))]
+            return [('mess', self.player.name+' a encore voulu se cacher mais n\'a pas pu')]
         self.stamina = 0
-        self.addonturnremove(self.hiding)
-        self.lastTurnHide = True
+        self.addtargettrigger(self.hiding)
+        self.addonturnresolve(self.endHiding)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,target,amount,dtype):
         if(dtype != 'zone'):
             return True,['mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...']
-    
+    def canHide(self):
+        self.lastTurnHide = False
+        return []
+    def endHiding(self):
+        self.lastTurnHide = True
+        self.removeonturnresolve(self.endHiding)
+        self.removetargettrigger(self.hiding)
+        self.addonturnresolve(self.canHide)
+        return ['mess', self.player.name + ' est sorti de sa cachette']
+
+
+    def attack(self):
+        if(self.stamina >= self.att_cost):
+            self.stamina -= self.att_cost
+        else:
+            return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
+        target = findtarget()
+        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
 
     
 class mage_noir(classe):
