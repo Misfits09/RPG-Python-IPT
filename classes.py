@@ -142,7 +142,7 @@ class classe():
             except : pass
         if dtype == 'physique':    
             self.hp -= amount*(1 - self.armor)
-        elif dtype == 'magique :
+        elif dtype == 'magique' :
             self.hp -= amount*(1 - self.resistance)
         else :
             self.hp -= amount
