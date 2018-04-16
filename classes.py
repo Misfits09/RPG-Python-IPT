@@ -101,13 +101,6 @@ class classe():
             except : pass
         if not do_attk:
             return commlist
-        for fct in target.onturnremove:
-            try : 
-                a,b = fct(self,target,amount,dtype)
-                if a :
-                    do_attk = False
-                commlist += b
-            except : pass
         for fct in target.targettrigger:
             try : 
                 a,b = fct(self,target,amount,dtype)
@@ -125,8 +118,9 @@ class classe():
         commlist = []
         for fct in self.hittrigger:
             try : 
-                a,b = fct(self,target,amount,dtype)
+                a,dt,b = fct(self,target,amount,dtype)
                 amount = a
+                dtype = dt
                 commlist += b
             except : pass
         return commlist + target.take_damage(self,amount,dtype)
