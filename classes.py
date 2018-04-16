@@ -4,7 +4,7 @@ class joueur():
     classes = [guerrier,ninja,mage_blanc,mage_noir,mage_rouge,barbare,barde,freelance,lancier]
     alive = True
     F = None
-    def __init__(self,i): #stat = [ad,att_cost,heal_points,heal_cost,pvMAX,staminaMAX]
+    def __init__(self,i):
         self.id,self.name = i,str(i)
     def set_field(self,fi):
         self.F = fi
