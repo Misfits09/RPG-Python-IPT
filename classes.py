@@ -49,7 +49,7 @@ def findtarget():
             if(pl.name.casefold().strip() == name and pl.alive):
                 plFound = True
                 print('\n  Vous ciblez '+pl.name)
-                return pl.class
+                return pl.classe
         if (not plFound):
             print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
 
