@@ -241,7 +241,7 @@ class ninja(classe):
     stamina = staminaMAX
     help = [('hide', 'Se cache pendant un tour et ne peut plus attaquer (40 Endurance)'),
             ('attack','Attaque physique de base ('+str(att_cost)+' Endurance)'),
-            ('esquive','Esquive la prochaine attaque')]
+            ('esquive','Esquive la prochaine attaque (35 Endurance)')]
     lastTurnHide = False
 
     #Se cacher pendant un tour (si dtype != zone)
