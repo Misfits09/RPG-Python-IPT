@@ -82,10 +82,10 @@ class classe():
     def addonturnresolve(self,function):
         self.onturnresolve.append(function)
     def removeonturnresolve(self,function):
-        self.onturnresolve.remove(function)
+        self.hittrigger.remove(function)
     def new_turn(self): #appelée à chaque début de tour du joueur
-        for fct in onturnresolve:
-            fct(self)
+        pass
+
     #ciblage d'attaque
     def attack_target(self,target,amount,dtype):
         commlist = []
@@ -138,7 +138,12 @@ class classe():
                 amount = a
                 commlist += b
             except : pass
-        self.hp -= amount*(1 - self.armor)
+        if dtype == 'physique':    
+            self.hp -= amount*(1 - self.armor)
+        elif dtype == 'magique :
+            self.hp -= amount*(1 - self.resistance)
+        else :
+            self.hp -= amount
         if self.hp <= 0 :
             self.hp = 0
             return [self.player.F.isDead(self.player)]
