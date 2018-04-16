@@ -239,12 +239,14 @@ class ninja(classe):
     speed = 150
     hp = pvMAX
     stamina = staminaMAX
-    help = [('hide', 'Se cache pendant un tour et ne peut plus attaquer (40 Endurance)'),('attack','Attaque physique de base ('+str(att_cost))+' Endurance)']
+    help = [('hide', 'Se cache pendant un tour et ne peut plus attaquer (40 Endurance)'),
+            ('attack','Attaque physique de base ('+str(att_cost)+' Endurance)'),
+            ('esquive','Esquive la prochaine attaque')]
     lastTurnHide = False
 
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
-        if self.stamina < 40 :
+        if self.stamina < 50 :
             return [('mess', self.player.name+' n\'a pas la force de se cacher : Endurance à '+str(self.stamina))]
         elif self.lastTurnHide :
             return [('mess', self.player.name+' a encore voulu se cacher mais n\'a pas pu')]
@@ -272,8 +274,21 @@ class ninja(classe):
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         target = findtarget()
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
+    
+    def esquive(self):
+        if self.stamina < 35:
+            return [('mess', self.player.name+' n\' a pas la force de se préparer à esquiver : Endurance à '+str(self.stamina))]
+        else:
+            self.stamina -= 35
+        self.addtargettrigger(self.esquiving)
+    def esquiving(self,source,target,amount,dtype):
+        self.removetargettrigger(self.esquiving)
+        return True,['mess',self.player.name + ' esquive l\'attaque avec classe ! ']
+
     def spell (self,nomduspell):
-        return {'hide':self.hide , 'attack':self.attack}[nomduspell]()
+        return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive}[nomduspell]()
+        
+    
     
 class mage_noir(classe):
     name = 'mage noir'
