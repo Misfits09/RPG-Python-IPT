@@ -8,11 +8,14 @@ Created on Fri Apr 13 15:56:35 2018
 import socket
 import random
 import pickle
+from classes import *
+
 """ Règles :
 -> Chaque joueur a une caractéristique d'attaque et d'épine
 -> Si un joueur attaque un autre il prend des dégats d'épine
 -> Si un joueur tue un autre il ne prend pas les dégats d'épine
 """ 
+"""
 class joueur():
     alive = True
     spike = 0
@@ -95,8 +98,8 @@ class field():
         for j in self.player:
             a += str(j)+" | "
         return a
-
-version = "BETA 2.2"
+"""
+version = "BETA 3.0"
 print("Bienvenue sur RPG "+version+"\n \n \n")
 print("Connection à un serveur :")
 r = 0
@@ -131,7 +134,7 @@ if(r[0]=='player_id'):
 else:
     send_error(0)
 
-#Envoi pseudo (A VENIR : selection equipement)
+#Envoi pseudo 
 print('En attente des autres joueurs ...')
 if(get_updt() == ["get_name", True]):
     while 1:
@@ -142,16 +145,17 @@ if(get_updt() == ["get_name", True]):
             break
         except:
             send_error(2)
-# mss[1].strip().casefold() in [j.name for j in joueur.classes]
+
+#Récupération classe
 print('En attente des autres joueurs ...')
 if(get_updt() == ["get_classe", True]):
     print('Choissisez parmis les classes suivantes : ')
-    for k in [j.name for j in joueur.classes]:
+    for k in [j.name for j in classes]:
         print(' -> '+k)
     while 1:
         try :
             maclasse = str(input('Votre classe : '))
-            if maclasse in [j.name for j in joueur.classes]:
+            if maclasse in [j.name for j in classes]:
                 send_updt(["classe",maclasse])
                 break
             else:
@@ -181,7 +185,7 @@ def rStartTour(name): #Phrases aléatoires de début de tour
 def command(a): #gestion des commandes pendant un tour
     global F, u_alive
     def wrong_c():
-        print('\n Commande incomprise '+a[0]+' : Vérifiez votre commande (un seul espace entre chaque argument)')
+        print('\n Commande incomprise '+al[0]+' : Vérifiez votre commande (un seul espace entre chaque argument)')
         send_updt(['mess',jName+' a voulu faire quelque chose d\' impossible'])
         return True
     a = a.strip().casefold()
@@ -195,18 +199,19 @@ def command(a): #gestion des commandes pendant un tour
                 print('       -> '+a+' : '+b)
             send_updt(['mess',jName+' a demandé de l\'aide']) 
             return True 
-        elif(al[0] == 'helpclass'):
+        elif(al[0] == 'helpspell'):
             print('Voici vos sorts : \n')
             for a,b in F.player[jID - 1].classe.help:
                 print('       -> '+a+' : '+b)
             send_updt(['mess',jName+' consulte son livre de sorts']) 
+            return True
         elif(al[0] == 'fin'):
             print('\n    -Fin de votre tour-   \n \n')
             send_updt(['mess',jName+' a fini de se battre'])
             return False
         elif(al[0] == 'spell'):
             try:
-                toshow = F.player[jID - 1].classe.spell(al[1])
+                toshow = F.player[jID - 1].classe.spell(al[1],F)
                 for typeR,obj in toshow:
                     if typeR == 'death':
                         if(obj == F.player[jID-1]): #Si le joueur meurt de lui même
@@ -283,6 +288,19 @@ def mon_tour(): #Gestion locale du tour avec le terrain donné
     strt_mss = rStartTour(jName)
     print(strt_mss)
     send_updt(['mess',strt_mss])
+    for typeR,obj in F.player[jID - 1].classe.new_turn():
+        if typeR == 'death':
+             if(obj == F.player[jID-1]): #Si le joueur meurt de lui même
+                    print('Vous êtes mort en commencant votre tour')
+                    send_updt(['mess', jName+' est mort en commençant son tour'])
+                    u_alive = False
+                    return False
+             else:
+                print(' Vous avez tué '+obj.name)
+                send_updt(['death',obj,jName+' a tué '+obj.name])
+        elif typeR == 'mess':
+            print(obj)
+            send_updt(['mess',obj])
     cd = True
     while cd:
         cmd = input('Que voulez vous faire ? (détails : help) : \n')
