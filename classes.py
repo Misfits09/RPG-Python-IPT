@@ -269,6 +269,7 @@ class ninja(classe):
         return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
     def canHide(self):
         self.lastTurnHide = False
+        self.removeonturnresolve(self.canHide)
         return []
     def endHiding(self):
         self.lastTurnHide = True
