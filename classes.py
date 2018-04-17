@@ -255,10 +255,10 @@ class ninja(classe):
     help = [('hide', 'Se cache pendant un tour et ne peut plus attaquer (40 Endurance)'),
             ('attack','Attaque physique de base ('+str(att_cost)+' Endurance)'),
             ('esquive','Esquive la prochaine attaque (35 Endurance)')]
-    lastTurnHide = False
 
     def __init__(self):
         self.trigger = triggers()
+        self.lastTurnHide = False
     def set_player(self,j):
         self.player = j
         self.trigger.addDmg(self.spikes)

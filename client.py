@@ -240,7 +240,7 @@ def command(a): #gestion des commandes pendant un tour
             print('         - Soin : '+str(you.heal_points)+' et un soin coûte '+str(you.heal_cost)+' d\'endurance')
             print('         - Armure : '+str(you.armor*100)+'% des dégâts absorbés')
             return True
-        elif(a[0] == 'forceend'):
+        elif(al[0] == 'forceend'):
             print('\n    -Fin de partie-   \n \n')
             send_updt(['mess','\n    -Fin de partie-   \n \n'])
             send_updt(['forceEND',True])
