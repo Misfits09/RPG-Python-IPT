@@ -11,7 +11,8 @@ class joueur():
     def set_classe(self,nomclasse):
         for i in classes:
             if i.name == nomclasse:
-                self.classe = i(self)
+                self.classe = i()
+                self.classe.set_player(self)
                 break
     def restore_stamina(self):
         self.classe.stamina = self.classe.staminaMAX
@@ -54,42 +55,39 @@ def findtarget():
                 return pl.classe
         if (not plFound):
             print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
+class triggers():
+    print("Créé")
+    def __init__(self):
+        self.target = []
+        self.init = []
+        self.damage = []
+        self.turnresolve = []
+        self.hit = []
+    def addT(self,f):
+        self.target.append(f)
+    def remT(self,f):
+        self.target.remove(f)
+    def addI(self,f):
+        self.init.append(f)
+    def remI(self,f):
+        self.init.remove(f)
+    def addDmg(self,f):
+        self.damage.append(f)
+    def remDmg(self,f):
+        self.damage.remove(f)
+    def addTrRes(self,f):
+        self.turnresolve.append(f)
+    def remTrRes(self,f):
+        self.turnresolve.remove(f)
+    def addHit(self,f):
+        self.hit.append(f)
+    def remHit(self,f):
+        self.hit.remove(f)
+    def __str__(self):
+        return str((self.init,self.target,self.damage,self.turnresolve,self.hit))
 
 class classe():
-    def __init__(self,j):
-        self.player = j
-        self.adddmgtrigger(self.spikes)
-        self.addtargettrigger(self.dodgef)
         
-    targettrigger = []
-    def addtargettrigger(self,function):
-        self.targettrigger.append(function)
-    def removetargettrigger(self,function):
-        self.targettrigger.remove(function)
-    
-    dmgtrigger = []
-    def adddmgtrigger(self,function):
-        self.dmgtrigger.append(function)
-    def removedmgtrigger(self,function):
-        self.dmgtrigger.remove(function)
-    
-    inittrigger = []
-    def addinittrigger(self,function):
-        self.inittrigger.append(function)
-    def removeinittrigger(self,function):
-        self.inittrigger.remove(function)
-    
-    hittrigger = []
-    def addhittrigger(self,function):
-        self.hittrigger.append(function)
-    def removehittrigger(self,function):
-        self.hittrigger.remove(function)
-    
-    onturnresolve = []
-    def addonturnresolve(self,function):
-        self.onturnresolve.append(function)
-    def removeonturnresolve(self,function):
-        self.onturnresolve.remove(function)
     
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
@@ -104,7 +102,7 @@ class classe():
     def attack_target(self,target,amount,dtype):
         commlist = []
         do_attk = True
-        for fct in self.inittrigger:
+        for fct in self.trigger.init:
             try : 
                 a,b = fct(self,amount,dtype)
                 if a :
@@ -113,7 +111,7 @@ class classe():
             except : pass
         if not do_attk:
             return commlist
-        for fct in target.targettrigger:
+        for fct in target.trigger.target:
             try : 
                 a,b = fct(self,target,amount,dtype)
                 if a :
@@ -128,7 +126,7 @@ class classe():
     #application dégâts
     def hit_attack(self,target,amount,dtype):
         commlist = []
-        for fct in self.hittrigger:
+        for fct in self.trigger.hit:
             try : 
                 a,dt,b = fct(self,target,amount,dtype)
                 amount = a
@@ -140,7 +138,7 @@ class classe():
     #réception dégâts
     def take_damage(self,source,amount,dtype):
         commlist = []
-        for fct in self.dmgtrigger:
+        for fct in self.trigger.damage:
             try : 
                 a,b = fct(source,self,amount,dtype)
                 amount = a
@@ -187,21 +185,26 @@ class guerrier(classe):
     help = [('block','réduit les dégâts physiques pendant un tour (40 Endurance)'),
             ('protect','encaisse la prochaine attaque à la place de la cible (40 Endurance)'),
             ('attack','attaque de base ('+str(att_cost)+' Endurance)')]
-    
+    def __init__(self):
+        self.trigger = triggers()
+    def set_player(self,j):
+        self.player = j
+        self.trigger.addDmg(self.spikes)
+        self.trigger.addT(self.dodgef)
     #bloquer la prochaine attaque (dmgtrigger sur soi)
     def block(self):
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de bloquer : Endurance à '+str(self.stamina))]
         self.stamina = 0
-        self.adddmgtrigger(self.blocking)
-        self.addonturnresolve(self.removeblocking)
+        self.trigger.addDmg(self.blocking)
+        self.trigger.addTrRes(self.removeblocking)
         return [('mess', self.player.name+' se prépare à bloquer')]
     def blocking(self,source,target,amount,dtype):
         if dtype == 'physique':
             return amount/2,[('mess',self.player.name+' bloque l\'attaque')]
     def removeblocking(self):
-        self.removedmgtrigger(self.blocking)
-        self.removeonturnresolve(self.removeblocking)
+        self.trigger.remDmg(self.blocking)
+        self.trigger.remTrRes(self.removeblocking)
         return [('mess',self.player.name + ' ne bloque plus les coups')]
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
@@ -210,11 +213,11 @@ class guerrier(classe):
             return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         self.stamina -= 40
         pl = findtarget()
-        pl.addtargettrigger(self.protection)
+        pl.trigger.addT(self.protection)
         return [('mess',self.player.name+' protège '+pl.player.name)]
     def protection(self,source,target,amount,dtype):
         if dtype == 'physique':
-            target.removetargettrigger(self.protection)
+            target.trigger.remT(self.protection)
             return True,([('mess',self.player.name+' encaisse l\'attaque à sa place')] + source.hit_attack(self,amount,dtype))
     
     #lancer un sort
@@ -255,6 +258,12 @@ class ninja(classe):
             ('esquive','Esquive la prochaine attaque (35 Endurance)')]
     lastTurnHide = False
 
+    def __init__(self):
+        self.trigger = triggers()
+    def set_player(self,j):
+        self.player = j
+        self.trigger.addDmg(self.spikes)
+        self.trigger.addT(self.dodgef)
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
         if self.stamina < 50 :
@@ -262,20 +271,20 @@ class ninja(classe):
         elif self.lastTurnHide :
             return [('mess', self.player.name+' a encore voulu se cacher mais n\'a pas pu')]
         self.stamina = 0
-        self.addtargettrigger(self.hiding)
-        self.addonturnresolve(self.endHiding)
+        self.trigger.addT(self.hiding)
+        self.trigger.addTrRes(self.endHiding)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,target,amount,dtype):
         return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
     def canHide(self):
         self.lastTurnHide = False
-        self.removeonturnresolve(self.canHide)
+        self.trigger.remTrRes(self.canHide)
         return []
     def endHiding(self):
         self.lastTurnHide = True
-        self.removeonturnresolve(self.endHiding)
-        self.removetargettrigger(self.hiding)
-        self.addonturnresolve(self.canHide)
+        self.trigger.remTrRes(self.endHiding)
+        self.trigger.remT(self.hiding)
+        self.trigger.addTrRes(self.canHide)
         return [('mess', self.player.name + ' est sorti de sa cachette')]
 
 
@@ -292,10 +301,10 @@ class ninja(classe):
             return [('mess', self.player.name+' n\' a pas la force de se préparer à esquiver : Endurance à '+str(self.stamina))]
         else:
             self.stamina -= 35
-        self.addtargettrigger(self.esquiving)
+        self.trigger.addT(self.esquiving)
         return [('mess',self.player.name+' est prêt à esquiver l\'attaque')]
     def esquiving(self,source,target,amount,dtype):
-        self.removetargettrigger(self.esquiving)
+        self.trigger.remT(self.esquiving)
         return True,[('mess',self.player.name + ' esquive l\'attaque avec classe ! ')]
 
     def spell (self,nomduspell, fld):
