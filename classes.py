@@ -313,8 +313,6 @@ class ninja(classe):
     def __str__(self):
         return 'Maître Ninja '+self.player.name+' a '+str(self.hp)+' PV, et un entrainement aux arts martiaux !'
 
-        
-    
 class mage_noir(classe):
     name = 'mage noir'
     spike = 0
@@ -426,7 +424,5 @@ class lancier(classe):
     speed = 60
     hp = pvMAX
     stamina = staminaMAX
-    pass
-
 
 classes = [guerrier,ninja]
