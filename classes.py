@@ -396,21 +396,14 @@ class mage_blanc(classe):
                     if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
                         plFound = True
                         print('\n  Vous réanimez '+pl.name)
+                        pl.alive = True
+                        return [('mess',pl.name+' est réanimé par '+self.player.name)]
                         # TODO
                 if (not plFound):
                     print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il n\'est pas mort')
         self.stamina += 100
         return [('mess','Personne n\'est mort donc personne à réanimer...')]
-        while 1:
-            name = str(input('Nom de la cible morte : '))
-            plFound = False
-            for pl in F.player:
-                if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
-                    plFound = True
-                    print('\n  Vous ciblez '+pl.name)
-                    return pl.classe
-            if (not plFound):
-                print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
+        
     def spell (self,nomduspell, fld):
         global F
         F = fld
