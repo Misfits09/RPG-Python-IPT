@@ -344,6 +344,80 @@ class mage_blanc(classe):
     speed = 115
     hp = pvMAX
     stamina = staminaMAX
+    help = [('heal','Soigne la cible de 25 PV (30 Endurance)'),('reborn','Fait renaitre un joueur mort (100 Endurance)'),('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation')]
+    def __init__(self):
+        self.trigger = triggers()
+        self.hasDoneGS = False
+    def set_player(self,j):
+        self.player = j
+        self.trigger.addDmg(self.spikes)
+        self.trigger.addT(self.dodgef)
+        
+    def soin(self):
+        if self.stamina < 30:
+            return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
+        else:
+            tg = findtarget()
+            tg.hp += 25
+            if tg.hp > tg.hpMAX:
+                tg.hp = tg.hpMAX
+            return [('mess',tg.player.name + ' a été soigné par '+self.player.name+' et a maintenant '+str(tg.hp)+' PV')]
+    
+    def godshield(shield):
+        if self.stamina <  100:
+            return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
+        elif self.hasDoneGS:
+            return [('mess',self.player.name + ' ne peut pas canaliser un nouveau bouclier divin ')]
+        self.stamina -= 100
+        tg = findtarget()
+        tg.trigger.addT(self.isGodShielded)
+        tg.trigger.addTrRes(self.remGodShield)
+        self.hasDoneGS = True
+        return [('mess',tg.player.name + ' a reçu une protection divine par '+self.player.name)]
+    def isGodShielded(self,src,tg,amount,dtyp):
+        return True,[('mess',self.player.name +' est protégé par les dieux')]
+    def remGodShield(self):
+        self.target.remT(self.isGodShielded)
+        self.target.remTrRes(self.remGodShield)
+        return [('mess','Le bouclier divin de '+self.player.name+' est tombé')]
+    def reborn(self):
+        return [('mess','Ce sort n\'est pas encore actif')]
+        if self.stamina <  100:
+            return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
+        global F
+        for p in F.player:
+            if(p.alive == False):
+                break
+        else:
+            while 1:
+                name = str(input('Nom du mort : '))
+                plFound = False
+                for pl in F.player:
+                    if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
+                        plFound = True
+                        print('\n  Vous réanimez '+pl.name)
+                        # TODO
+                if (not plFound):
+                    print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il n\'est pas mort')
+        self.stamina += 100
+        return [('mess','Personne n\'est mort donc personne à réanimer...')]
+        while 1:
+            name = str(input('Nom de la cible morte : '))
+            plFound = False
+            for pl in F.player:
+                if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
+                    plFound = True
+                    print('\n  Vous ciblez '+pl.name)
+                    return pl.classe
+            if (not plFound):
+                print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
+    def spell (self,nomduspell, fld):
+        global F
+        F = fld
+        return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield}[nomduspell]()
+    def __str__(self):
+        return 'Mage Blanc '+self.player.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
+    
     
 class barbare(classe):
     name = 'barbare'
