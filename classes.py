@@ -1,22 +1,22 @@
-import random
-
 class joueur():
-    classes = [guerrier,ninja,mage_blanc,mage_noir,mage_rouge,barbare,barde,freelance,lancier]
     alive = True
     F = None
-    def __init__(self,i):
+    classe = None
+    def __init__(self,i): #stat = [ad,att_cost,heal_points,heal_cost,pvMAX,staminaMAX]
         self.id,self.name = i,str(i)
     def set_field(self,fi):
         self.F = fi
     def set_classe(self,nomclasse):
-        for i in self.classes:
+        for i in classes:
+            print(str(i.name)+str(nomclasse)+str(i.name == nomclasse))
             if i.name == nomclasse:
                 self.classe = i(self)
+                break
     def restore_stamina(self):
         self.classe.stamina = self.classe.staminaMAX
     def __str__(self):
         if self.alive:
-            return str(self.name) + " à " + str(self.hp) + "PV et fait "+str(self.ad)+" de dégats"
+            return str(self.classe)
         else:
             return str(self.name) + " est mort"
     def __eq__(self,other):
@@ -44,10 +44,10 @@ class field():
 def findtarget():
     global F
     while 1:
-        name = str(input('nom de la cible'))
+        name = str(input('nom de la cible : '))
         plFound = False
         for pl in F.player:
-            if(pl.name.casefold().strip() == name and pl.alive):
+            if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
                 plFound = True
                 print('\n  Vous ciblez '+pl.name)
                 return pl.classe
@@ -55,8 +55,8 @@ def findtarget():
             print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
 
 class classe():
-    def ___init__(self,joueur):
-        self.player = joueur
+    def __init__(self,j):
+        self.player = j
         self.adddmgtrigger(self.spikes)
         self.addtargettrigger(self.dodge)
         
@@ -94,7 +94,9 @@ class classe():
     def new_turn(self): 
         commlist = []
         for fct in self.onturnresolve:
-            commlist += fct(self)
+            try :
+                commlist += fct()
+            except : pass
         return commlist
     
     #ciblage d'attaque
@@ -198,6 +200,7 @@ class guerrier(classe):
     def removeblocking(self):
         self.removedmgtrigger(self.blocking)
         self.removeonturnresolve(self.removeblocking)
+        return [('mess',self.player.name + ' ne bloque plus les coups')]
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
     def protect (self):
@@ -206,15 +209,17 @@ class guerrier(classe):
         self.stamina -= 40
         pl = findtarget()
         pl.addtargettrigger(self.protection)
-        return [('mess',self.player.name+' protège '+pl.name)]
+        return [('mess',self.player.name+' protège '+pl.player.name)]
     def protection(self,source,target,amount,dtype):
         if dtype == 'physique':
             target.removetargettrigger(self.protection)
             return True,([('mess',self.player.name+' bloque le coup')] + source.hit_attack(self,amount,dtype))
     
     #lancer un sort
-    def spell (self,nomduspell):
-        return {'block':self.block , 'protect':self.protect , 'attaque':self.attack}[nomduspell]()
+    def spell (self,nomduspell,fld):
+        global F
+        F = fld
+        return {'block':self.block , 'protect':self.protect , 'attack':self.attack}[nomduspell]()
     
     #attaque de base
     def attack(self):
@@ -224,6 +229,9 @@ class guerrier(classe):
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         target = findtarget()
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
+    
+    def __str__(self):
+        return 'Guerrier '+self.player.name+' a '+str(self.hp)+' PV, une armure moyenne et un bon bouclier !'
     
 class ninja(classe):
     name = 'ninja'
@@ -256,7 +264,7 @@ class ninja(classe):
         self.addonturnresolve(self.endHiding)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,target,amount,dtype):
-        return True,['mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...']
+        return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
     def canHide(self):
         self.lastTurnHide = False
         return []
@@ -265,7 +273,7 @@ class ninja(classe):
         self.removeonturnresolve(self.endHiding)
         self.removetargettrigger(self.hiding)
         self.addonturnresolve(self.canHide)
-        return ['mess', self.player.name + ' est sorti de sa cachette']
+        return [('mess', self.player.name + ' est sorti de sa cachette')]
 
 
     def attack(self):
@@ -284,11 +292,17 @@ class ninja(classe):
         self.addtargettrigger(self.esquiving)
     def esquiving(self,source,target,amount,dtype):
         self.removetargettrigger(self.esquiving)
-        return True,['mess',self.player.name + ' esquive l\'attaque avec classe ! ']
+        return True,[('mess',self.player.name + ' esquive l\'attaque avec classe ! ')]
 
-    def spell (self,nomduspell):
+    def spell (self,nomduspell, fld):
+        global F
+        F = fld
         return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive}[nomduspell]()
+    def __str__(self):
+        return 'Maître Ninja '+self.player.name+' a '+str(self.hp)+' PV, et un entrainement aux arts martiaux !'
+
         
+    
 class mage_noir(classe):
     name = 'mage noir'
     spike = 0
@@ -400,4 +414,7 @@ class lancier(classe):
     speed = 60
     hp = pvMAX
     stamina = staminaMAX
-    
+    pass
+
+
+classes = [guerrier,ninja]
