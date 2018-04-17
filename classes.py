@@ -92,7 +92,7 @@ class classe():
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
         commlist = []
-        for fct in self.onturnresolve:
+        for fct in self.trigger.turnresolve:
             try :
                 commlist += fct()
             except : pass
