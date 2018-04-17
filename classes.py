@@ -56,7 +56,6 @@ def findtarget():
         if (not plFound):
             print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
 class triggers():
-    print("Créé")
     def __init__(self):
         self.target = []
         self.init = []
