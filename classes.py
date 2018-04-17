@@ -392,6 +392,7 @@ class mage_blanc(classe):
     def reborn(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
+        self.stamina -= 100
         global F
         for p in F.player:
             if(p.alive == False):
