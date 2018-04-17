@@ -2,13 +2,12 @@ class joueur():
     alive = True
     F = None
     classe = None
-    def __init__(self,i): #stat = [ad,att_cost,heal_points,heal_cost,pvMAX,staminaMAX]
+    def __init__(self,i): 
         self.id,self.name = i,str(i)
     def set_field(self,fi):
         self.F = fi
     def set_classe(self,nomclasse):
         for i in classes:
-            print(str(i.name)+str(nomclasse)+str(i.name == nomclasse))
             if i.name == nomclasse:
                 self.classe = i(self)
                 break
