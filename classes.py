@@ -388,12 +388,13 @@ class mage_blanc(classe):
     def isGodShielded(self,src,tg,amount,dtyp):
         return True,[('mess',self.player.name +' est protégé par les dieux')]
     def remGodShield(self):
-        self.target.remT(self.isGodShielded)
-        self.target.remTrRes(self.remGodShield)
+        self.trigger.remT(self.isGodShielded)
+        self.trigger.remTrRes(self.remGodShield)
         return [('mess','Le bouclier divin de '+self.player.name+' est tombé')]
     def reborn(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
+        self.stamina -= 100
         global F
         for p in F.player:
             if(p.alive == False):
