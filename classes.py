@@ -160,7 +160,7 @@ class classe():
     #dégâts d'épine
     def spikes(self,source,target,amount,dtype):
         if dtype == 'physique' and self.spike != 0:
-            return [('mess',source.player.name+' se blesse en attaquant')] +source.take_damage(self,self.spike,'physique')
+            return [('mess',source.player.name+' se blesse en attaquant')] +source.take_damage(self,self.spike,'spike')
     
     #esquive
     def dodgef(self,source,target,amount,dtype):
