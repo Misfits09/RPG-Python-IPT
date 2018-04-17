@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Server Code : RPG IPT 2018"""
 import time
+"""
 class joueur():
     classes = ['guerrier']
     alive = True
@@ -60,11 +61,12 @@ class field():
         for j in self.player:
             a += str(j)+" | "
         return a
+"""
 import socket
 import pickle
 from builtins import *
 import random
-
+from classes import *
 #DÃ©finition des fonctions
 def TF(message):
     while 1:
@@ -89,7 +91,7 @@ def getInt(message):
 
 #Initialisation de la partie
 
-version = 'BETA 2.0'
+version = 'BETA 3.0'
 port = 4291
 localIP = socket.gethostbyname(socket.gethostname())
 if localIP == '127.0.0.1' :
@@ -101,14 +103,15 @@ if(TF("Voulez vous lancer une partie ?")):
     nbj = getInt("Nombre de joueurs")
     idle("rechercher des joueurs : ")
     s = socket.socket()
-    s.bind((socket.gethostname(),port))
+    #s.bind((socket.gethostname(),port))
+    s.bind(('',port))
     s.listen()
     p = []
     sockp = []
     for i in range(nbj):
         print("     Attente joueur "+str(i+1))
         (sock,address) = s.accept()
-        p.append(joueur(i+1,random.randint(30,50)))
+        p.append(joueur(i+1))
         sockp.append(sock)
         sock.send(pickle.dumps(["player_id",i+1]))
         print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
@@ -152,11 +155,12 @@ for i in range(nbj):
     mss = pickle.loads(sockp[i].recv(1024)) # de type ['classe', nomdelaclasse]
     try :
         if (mss[0] == "classe"):
-            F.player[i].set_classe(mss[1])
+            print('Classe recue : \'',mss[1],'\' ')
+            F.player[i].set_classe(mss[1].strip().casefold())
         else:
-            F.player[i].set_classe('freelance')
+            F.player[i].set_classe('guerrier')
     except:
-        F.player[i].set_classe('freelance')
+        F.player[i].set_classe('guerrier')
 
 # Téléchargement du Field chez les clients
 print('\n \n Tour 0 : Mise a jour du terrain pour les '+str(nbj)+' joueurs')
@@ -224,11 +228,12 @@ while 1:
             else:
                 pass
     send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
+"""
     if( F.nb == 1):
         send(list(range(1,nbj+1)),['end_game','Fin de la partie, le gagnant est : '+F.player[0].name])
     elif( F.nb == 0):
         send(list(range(1,nbj+1)),['end_game','Fin de la partie, le combat a été rude... Personne ne gagne ! '])
     i += 1
-
+"""
 
 input('Fin de partie')
