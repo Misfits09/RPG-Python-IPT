@@ -123,6 +123,7 @@ def get_updt():
     return up_r
 def send_updt(u):
     s.send(pickle.dumps(u))
+    time.sleep(.5)
 def send_error(ider):
     send_updt(["error",ider])
 
@@ -185,7 +186,7 @@ def rStartTour(name): #Phrases aléatoires de début de tour
 def command(a): #gestion des commandes pendant un tour
     global F, u_alive
     def wrong_c():
-        print('\n Commande incomprise '+al[0]+' : Vérifiez votre commande (un seul espace entre chaque argument)')
+        print('\n Commande incomprise '+a+' : Vérifiez votre commande (un seul espace entre chaque argument)')
         send_updt(['mess',jName+' a voulu faire quelque chose d\' impossible'])
         return True
     a = a.strip().casefold()
