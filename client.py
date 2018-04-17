@@ -229,39 +229,6 @@ def command(a): #gestion des commandes pendant un tour
             except:
                 return wrong_c()
 
-# elif(al[0] == 'attaquer'):
-#            
-#            try:
-#                plFound = False
-#                for pl in F.player:
-#                    if(pl.name.casefold().strip() == al[1] and pl.alive):
-#                        plFound = True
-#                        print('\n  Vous essayez d\'attaquer '+pl.name)
-#                        
-#                        send_updt(['mess',jName+' prend les armes et attaque !'])
-#                        for typeR,obj in F.player[jID-1].attack(pl):
-#                            if typeR == 'death':
-#                                if(obj == F.player[jID-1]): #Si le joueur meurt de lui même
-#                                    print('Vous êtes mort en attaquant')
-#                                    send_updt(['mess', jName+' est mort en combattant'])
-#                                    u_alive = False
-#                                    return False
-#                                else:
-#                                    print(' Vous avez tué '+obj.name)
-#                                    send_updt(['death',obj,obj.name+' est mort en combattant contre '+jName])
-#                            elif typeR == 'allOK':
-#                                print(obj)
-#                                send_updt(['mess',obj])
-#                    return True
-#                if (not plFound):
-#                    print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors est déjà mort')
-#                    return True
-#            except:
-#                return wrong_c()
-#            return False
-#        elif(al[0] == 'heal'):
-#            send_updt(F.player[jID-1].heal())
-#            return True
         elif(al[0] == 'stats'): # A REVOIR #
             you = F.player[jID - 1].classe
             print('     -> Voici vos informations :')
