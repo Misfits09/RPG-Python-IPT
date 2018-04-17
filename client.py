@@ -9,6 +9,7 @@ import socket
 import random
 import pickle
 from classes import *
+import time
 
 """ Règles :
 -> Chaque joueur a une caractéristique d'attaque et d'épine
