@@ -292,6 +292,7 @@ class ninja(classe):
         else:
             self.stamina -= 35
         self.addtargettrigger(self.esquiving)
+        return [('mess',self.player.name+' est prêt à esquiver l\'attaque')]
     def esquiving(self,source,target,amount,dtype):
         self.removetargettrigger(self.esquiving)
         return True,[('mess',self.player.name + ' esquive l\'attaque avec classe ! ')]
