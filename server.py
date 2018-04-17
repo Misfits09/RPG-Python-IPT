@@ -1,67 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Server Code : RPG IPT 2018"""
 import time
-"""
-class joueur():
-    classes = ['guerrier']
-    alive = True
-    spike = 0
-    armor = 0
-    ad = 0
-    F = None
-    def __init__(self,i,add):
-        self.hp = 100
-        self.id,self.name = i,str(i)
-        self.ad = add
-    def set_field(self,fi):
-        self.F = fi
-    def take_damage(self, amount):
-        self.hp -= amount*(1 - self.armor)
-        if self.hp <= 0 :
-            self.hp = 0
-            return False
-        return True
-    def attack(self,cible):
-        commList = []
-        commList.append(('allOK',jName+' attaque '+cible.name+' !'))
-        if not cible.take_damage(self.ad):  
-            commList.append(self.F.isDead(cible))
-            if(cible.spike != 0):
-                commList.append(('allOK',self.name + ' évite les épines de '+cible.name+' en le tuant'))
-        elif (cible.spike != 0 and self.take_damage(cible.spike)): # Argument après le 'and' ne se lance que si spike != 0
-            commList.append(('allOK',self.name + ' a attaque '+cible.name+' qui a maintenant '+cible.hp+' PV '+'\n'+' Mais s\'est fait mal en attaquant et a maintenant '+self.hp+' PV '))
-        elif (cible.spike != 0): #donc self.take_damage(cible.spike) a renvoyé False
-            commList.append(self.F.isDead(self))
-        else:
-            commList.append(('allOK',self.name + 'a attaque '+cible.name+' qui a maintenant '+str(cible.hp)+' PV (sans se faire mal) '))
-        commList.reverse()
-        return commList
-    def set_spec(self,dm):
-        self.ad = dm
-    
-    def __str__(self):
-        return str(self.name) + " à " + str(self.hp) + "PV et fait "+str(self.ad)+" de dégats"
-    def __eq__(self,other):
-        return self.id == other.id
-
-class field():
-    player = []
-    nb = 0
-    def __init__(self,p):
-        self.player = p
-        self.nb = len(p)
-        for j in self.player:
-            j.set_field(self)
-    def isDead(self, joueur):
-        self.player[joueur.id - 1].alive = False
-        self.nb -= 1
-        return ('death',joueur)
-    def __str__(self):
-        a = "Joueurs : "
-        for j in self.player:
-            a += str(j)+" | "
-        return a
-"""
 import socket
 import pickle
 from builtins import *
