@@ -59,7 +59,7 @@ class classe():
     def __init__(self,j):
         self.player = j
         self.adddmgtrigger(self.spikes)
-        self.addtargettrigger(self.dodge)
+        self.addtargettrigger(self.dodgef)
         
     targettrigger = []
     def addtargettrigger(self,function):
@@ -163,7 +163,7 @@ class classe():
             return [('mess',source.player.name+' se blesse en attaquant')] +source.take_damage(self,self.spike,'physique')
     
     #esquive
-    def esquive(self,source,target,amount,dtype):
+    def dodgef(self,source,target,amount,dtype):
         if self.dodge != 0:
             rd = random.randint(1,100)
             if rd <= self.dodge:
