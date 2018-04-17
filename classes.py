@@ -344,7 +344,9 @@ class mage_blanc(classe):
     speed = 115
     hp = pvMAX
     stamina = staminaMAX
-    help = [('heal','Soigne la cible de 25 PV (30 Endurance)'),('reborn','Fait renaitre un joueur mort (100 Endurance)'),('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation')]
+    help = [('heal','Soigne la cible de 25 PV (30 Endurance)'),
+            ('reborn','Fait renaitre un joueur mort (100 Endurance)'),
+            ('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation')]
     def __init__(self):
         self.trigger = triggers()
         self.hasDoneGS = False
@@ -492,4 +494,4 @@ class lancier(classe):
     hp = pvMAX
     stamina = staminaMAX
 
-classes = [guerrier,ninja]
+classes = [guerrier,ninja,mage_blanc]
