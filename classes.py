@@ -274,7 +274,7 @@ class ninja(classe):
         self.trigger.addT(self.hiding)
         self.trigger.addTrRes(self.endHiding)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
-    def hiding(self,target,amount,dtype):
+    def hiding(self,source,target,amount,dtype):
         return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
     def canHide(self):
         self.lastTurnHide = False
