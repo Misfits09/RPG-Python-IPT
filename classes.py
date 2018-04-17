@@ -179,13 +179,13 @@ class guerrier(classe):
     staminaMAX = 100
     pvMAX = 150
     speed = 50
-    hp = pvMAX
-    stamina = staminaMAX
     help = [('block','réduit les dégâts physiques pendant un tour (40 Endurance)'),
             ('protect','encaisse la prochaine attaque à la place de la cible (40 Endurance)'),
             ('attack','attaque de base ('+str(att_cost)+' Endurance)')]
     def __init__(self):
         self.trigger = triggers()
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
     def set_player(self,j):
         self.player = j
         self.trigger.addDmg(self.spikes)
@@ -250,8 +250,6 @@ class ninja(classe):
     staminaMAX = 100
     pvMAX = 85
     speed = 150
-    hp = pvMAX
-    stamina = staminaMAX
     help = [('hide', 'Se cache pendant un tour et ne peut plus attaquer (40 Endurance)'),
             ('attack','Attaque physique de base ('+str(att_cost)+' Endurance)'),
             ('esquive','Esquive la prochaine attaque (35 Endurance)')]
@@ -259,6 +257,8 @@ class ninja(classe):
     def __init__(self):
         self.trigger = triggers()
         self.lastTurnHide = False
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
     def set_player(self,j):
         self.player = j
         self.trigger.addDmg(self.spikes)
@@ -326,8 +326,6 @@ class mage_noir(classe):
     staminaMAX = 100
     pvMAX = 100
     speed = 95
-    hp = pvMAX
-    stamina = staminaMAX
 
 class mage_blanc(classe):
     name = 'mage blanc'
@@ -342,8 +340,6 @@ class mage_blanc(classe):
     staminaMAX = 100
     pvMAX = 100
     speed = 115
-    hp = pvMAX
-    stamina = staminaMAX
     help = [('soin','Soigne la cible de 25 PV (30 Endurance)'),
             ('reborn','Fait renaitre un joueur mort avec la moitié de sa vie(100 Endurance)'),
             ('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation'),
@@ -351,6 +347,8 @@ class mage_blanc(classe):
     def __init__(self):
         self.trigger = triggers()
         self.hasDoneGS = False
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
     def set_player(self,j):
         self.player = j
         self.trigger.addDmg(self.spikes)
@@ -388,8 +386,8 @@ class mage_blanc(classe):
     def isGodShielded(self,src,tg,amount,dtyp):
         return True,[('mess',self.player.name +' est protégé par les dieux')]
     def remGodShield(self):
-        self.target.remT(self.isGodShielded)
-        self.target.remTrRes(self.remGodShield)
+        self.trigger.remT(self.isGodShielded)
+        self.trigger.remTrRes(self.remGodShield)
         return [('mess','Le bouclier divin de '+self.player.name+' est tombé')]
     def reborn(self):
         if self.stamina <  100:
@@ -437,8 +435,6 @@ class barbare(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 75
-    hp = pvMAX
-    stamina = staminaMAX
 
 class freelance(classe):
     name = 'freelance'
@@ -453,8 +449,6 @@ class freelance(classe):
     staminaMAX = 100
     pvMAX = 100
     speed = 100
-    hp = pvMAX
-    stamina = staminaMAX
 
 class barde(classe):
     name = 'barde'
@@ -469,8 +463,6 @@ class barde(classe):
     staminaMAX = 100
     pvMAX = 110
     speed = 125
-    hp = pvMAX
-    stamina = staminaMAX
 
 class mage_rouge(classe):
     name = 'mage rouge'
@@ -485,8 +477,6 @@ class mage_rouge(classe):
     staminaMAX = 100
     pvMAX = 100
     speed = 100
-    hp = pvMAX
-    stamina = staminaMAX
     
 class lancier(classe):
     name = 'lancier'
@@ -501,7 +491,5 @@ class lancier(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 60
-    hp = pvMAX
-    stamina = staminaMAX
 
 classes = [guerrier,ninja,mage_blanc]
