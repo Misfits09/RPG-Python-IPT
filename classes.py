@@ -374,7 +374,7 @@ class mage_blanc(classe):
         target = findtarget()
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
-    def godshield(shield):
+    def godshield(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
         elif self.hasDoneGS:
@@ -419,7 +419,7 @@ class mage_blanc(classe):
     def spell (self,nomduspell, fld):
         global F
         F = fld
-        return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield}[nomduspell]()
+        return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield,'attack': self.attack}[nomduspell]()
     def __str__(self):
         return 'Mage Blanc '+self.player.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
     

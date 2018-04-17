@@ -136,6 +136,7 @@ while 1:
     i = 1
     for tour in range(nbj):
         if(F.player[tour].alive):
+            time.sleep(.5)
             send(list(range(1,nbj+1)),['mess',"\n \n >> C'est le tour de "+F.player[tour].name+" << "])
             print('Tour de '+F.player[tour].name)
             time.sleep(.5)
