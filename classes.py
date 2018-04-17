@@ -159,14 +159,15 @@ class classe():
     
     #dégâts d'épine
     def spikes(self,source,target,amount,dtype):
-        if dtype == 'physique':
+        if dtype == 'physique' and self.spike != 0:
             return [('mess',source.player.name+' se blesse en attaquant')] +source.take_damage(self,self.spike,'physique')
     
     #esquive
-    def dodge(self,source,target,amount,dtype):
-        rd = random.randint(1,100)
-        if rd <= self.dodge:
-            return True,[('mess',self.player.name+' a esquivé l\'attaque')]
+    def esquive(self,source,target,amount,dtype):
+        if self.dodge != 0:
+            rd = random.randint(1,100)
+            if rd <= self.dodge:
+                return True,[('mess',self.player.name+' a esquivé l\'attaque')]
 
 class guerrier(classe):
     name = 'guerrier'
