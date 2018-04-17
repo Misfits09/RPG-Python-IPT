@@ -337,16 +337,17 @@ class mage_blanc(classe):
     resistance = .30
     ad = 30
     heal_points = 40
-    att_cost = 30
+    att_cost = 25
     heal_cost = 30
     staminaMAX = 100
     pvMAX = 100
     speed = 115
     hp = pvMAX
     stamina = staminaMAX
-    help = [('heal','Soigne la cible de 25 PV (30 Endurance)'),
-            ('reborn','Fait renaitre un joueur mort (100 Endurance)'),
-            ('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation')]
+    help = [('soin','Soigne la cible de 25 PV (30 Endurance)'),
+            ('reborn','Fait renaitre un joueur mort avec la moitié de sa vie(100 Endurance)'),
+            ('godshield','Bouclier invulnérable d\'un tour sur une cible (100 Endurance et une seule utilisation'),
+            ('attack','Lance une faible attaque magique sur la cible (25 Endurance)')]
     def __init__(self):
         self.trigger = triggers()
         self.hasDoneGS = False
@@ -356,14 +357,22 @@ class mage_blanc(classe):
         self.trigger.addT(self.dodgef)
         
     def soin(self):
-        if self.stamina < 30:
+        if self.stamina < 35:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
         else:
             tg = findtarget()
+            self.stamina -= 35
             tg.hp += 25
-            if tg.hp > tg.hpMAX:
-                tg.hp = tg.hpMAX
+            if tg.hp > tg.pvMAX:
+                tg.hp = tg.pvMAX
             return [('mess',tg.player.name + ' a été soigné par '+self.player.name+' et a maintenant '+str(tg.hp)+' PV')]
+    def attack(self):
+        if(self.stamina >= self.att_cost):
+            self.stamina -= self.att_cost
+        else:
+            return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
+        target = findtarget()
+        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
     def godshield(shield):
         if self.stamina <  100:
@@ -383,28 +392,29 @@ class mage_blanc(classe):
         self.target.remTrRes(self.remGodShield)
         return [('mess','Le bouclier divin de '+self.player.name+' est tombé')]
     def reborn(self):
-        return [('mess','Ce sort n\'est pas encore actif')]
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         global F
         for p in F.player:
             if(p.alive == False):
+                while 1:
+                    name = str(input('Nom du mort : '))
+                    plFound = False
+                    for pl in F.player:
+                        if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
+                            plFound = True
+                            print('\n  Vous réanimez '+pl.name)
+                            pl.alive = True
+                            pl.classe.hp = int(pl.classe.pvMAX/2)
+                            F.nb += 1
+                            return [('mess',pl.name+' est réanimé par '+self.player.name)]
+                            # TODO
+                    if (not plFound):
+                        print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il n\'est pas mort')
                 break
-        else:
-            while 1:
-                name = str(input('Nom du mort : '))
-                plFound = False
-                for pl in F.player:
-                    if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
-                        plFound = True
-                        print('\n  Vous réanimez '+pl.name)
-                        pl.alive = True
-                        return [('mess',pl.name+' est réanimé par '+self.player.name)]
-                        # TODO
-                if (not plFound):
-                    print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il n\'est pas mort')
-        self.stamina += 100
-        return [('mess','Personne n\'est mort donc personne à réanimer...')]
+        else:  
+            self.stamina += 100
+            return [('mess','Personne n\'est mort donc personne à réanimer...')]
         
     def spell (self,nomduspell, fld):
         global F
