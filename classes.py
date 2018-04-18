@@ -74,10 +74,19 @@ class triggers():
         self.damage.append(f)
     def remDmg(self,f):
         self.damage.remove(f)
-    def addTrRes(self,f):
-        self.turnresolve.append(f)
+    def addTrRes(self,nb,f):
+        self.turnresolve.append((nb,f))
     def remTrRes(self,f):
-        self.turnresolve.remove(f)
+        for nb,fct in self.turnresolve:
+            if fct = f:
+                self.turnresolve.remove((nb,f))
+                break
+    def dec_counter(self,f):
+        L = self.onturnresolve
+        for i in range(len(L)):
+            if L[i][1] = f:
+                L[i] = (L[i][0]-1,f)
+                break
     def addHit(self,f):
         self.hit.append(f)
     def remHit(self,f):
@@ -91,10 +100,13 @@ class classe():
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
         commlist = []
-        for fct in self.trigger.turnresolve:
-            try :
-                commlist += fct()
-            except : pass
+        for nb,fct in self.trigger.turnresolve:
+            if nb != 0:
+                self.trigger.dec_counter(fct)
+            else:
+                try :
+                    commlist += fct(self)
+                except : pass
         return commlist
     
     #ciblage d'attaque
@@ -196,14 +208,14 @@ class guerrier(classe):
             return [('mess', self.player.name+' n\'a pas la force de bloquer : Endurance à '+str(self.stamina))]
         self.stamina = 0
         self.trigger.addDmg(self.blocking)
-        self.trigger.addTrRes(self.removeblocking)
+        self.trigger.addTrRes(0,self.removeblocking)
         return [('mess', self.player.name+' se prépare à bloquer')]
     def blocking(self,source,target,amount,dtype):
         if dtype == 'physique':
             return amount/2,[('mess',self.player.name+' bloque l\'attaque')]
-    def removeblocking(self):
-        self.trigger.remDmg(self.blocking)
-        self.trigger.remTrRes(self.removeblocking)
+    def removeblocking(self,holder):
+        holder.trigger.remDmg(self.blocking)
+        holder.trigger.remTrRes(self.removeblocking)
         return [('mess',self.player.name + ' ne bloque plus les coups')]
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
@@ -271,20 +283,20 @@ class ninja(classe):
             return [('mess', self.player.name+' a encore voulu se cacher mais n\'a pas pu')]
         self.stamina = 0
         self.trigger.addT(self.hiding)
-        self.trigger.addTrRes(self.endHiding)
+        self.trigger.addTrRes(0,self.endHiding)
+        self.trigger.addTrRes(1,self.canHide)
         return [('mess', self.player.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,source,target,amount,dtype):
         return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
-    def canHide(self):
-        self.lastTurnHide = False
-        self.trigger.remTrRes(self.canHide)
+    def canHide(self,holder):
+        holder.lastTurnHide = False
+        holder.trigger.remTrRes(self.canHide)
         return []
-    def endHiding(self):
-        self.lastTurnHide = True
-        self.trigger.remTrRes(self.endHiding)
-        self.trigger.remT(self.hiding)
-        self.trigger.addTrRes(self.canHide)
-        return [('mess', self.player.name + ' est sorti de sa cachette')]
+    def endHiding(self,holder):
+        holder.lastTurnHide = True
+        holder.trigger.remTrRes(self.endHiding)
+        holder.trigger.remT(self.hiding)
+        return [('mess', holder.player.name + ' est sorti de sa cachette')]
 
 
     def attack(self):
@@ -380,15 +392,15 @@ class mage_blanc(classe):
         self.stamina -= 100
         tg = findtarget()
         tg.trigger.addT(self.isGodShielded)
-        tg.trigger.addTrRes(self.remGodShield)
+        tg.trigger.addTrRes(0,self.remGodShield)
         self.hasDoneGS = True
         return [('mess',tg.player.name + ' a reçu une protection divine par '+self.player.name)]
     def isGodShielded(self,src,tg,amount,dtyp):
         return True,[('mess',self.player.name +' est protégé par les dieux')]
-    def remGodShield(self):
-        self.trigger.remT(self.isGodShielded)
-        self.trigger.remTrRes(self.remGodShield)
-        return [('mess','Le bouclier divin de '+self.player.name+' est tombé')]
+    def remGodShield(self,holder):
+        holder.trigger.remT(self.isGodShielded)
+        holder.trigger.remTrRes(self.remGodShield)
+        return [('mess','Le bouclier divin de '+holder.player.name+' est tombé')]
     def reborn(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
