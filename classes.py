@@ -439,15 +439,79 @@ class barbare(classe):
     name = 'barbare'
     spike = 15
     dodge = 0
-    armor = .15
-    resistance = 0
-    ad = 35
+    basearmor = .2
+    baseresistance = .15
+    basead = 35
     heal_points = 10
     att_cost = 30
     heal_cost = 70
     staminaMAX = 100
     pvMAX = 125
     speed = 75
+    help = [('pasif','le barbare augmente passivement sa force s\'il est frapppé')
+            ('attack','attaque de base('+str(att_cost)+' Endurance)')
+            ('double_tranchant','augmente l\'attaque au prix de la défense (40 Endurance) (2 tours)')]
+    def __init__(self):
+        self.trigger = triggers()
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
+        self.ad = self.basead
+        self.armor = self.basearmor
+        self.resistance = self.baseresistance
+        self.crit = 0
+        self.berzdmg = 0
+    def set_player(self,j):
+        self.player = j
+        self.trigger.addDmg(self.spikes)
+        self.trigger.addT(self.dodgef)
+        self.trigger.addDmg(self.berzerk)
+    
+    def __str__(self):
+        return 'Barbare '+self.player.name+ ' a '+str(self.hp)+' PV, une hache et s\'énerve facilement'
+
+    #augmenter son attaque pour 2 tours mais devient vulnérable
+    def double_tranchant(self):
+        if self.stamina < 40:
+            return [('mess',self.player.name+' n\' a pas la force de se booster')]
+        self.stamina -= 40
+        self.ad += 15
+        self.armor = -.25
+        self.resistance = -.25
+        self.trigger.remDmg(self.spikes)
+        self.trigger.addTrRes(1,self.remboost)
+        return [('mess',self.player.name+' prend une posture offensive mais risquée')]
+    def remboost(self,holder):
+        holder.ad = holder.basead
+        holder.armor = holder.basearmor
+        holder.resistance = holder.baseresistance
+        holder.trigger.addDmg(holder.spikes)
+        return [('mess',holder.player.name+' est de nouveau sur la défensive')]
+
+    #passif: augmenter l'ad et le crit si frappé
+    def berzerk(self,source,target,amount,dtype)
+        self.berzdmg += 5
+        self.crit += 10
+        return amount,[('mess','la rage de '+self.player.name+' monte')]
+    
+    #attaque de base
+    def attack(self):
+        if(self.stamina >= self.att_cost):
+            self.stamina -= self.att_cost
+        else:
+            return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
+        target = findtarget()
+        rd = random.randint(1,100)
+        if rd <= self.crit:
+            return ([('mess', self.player.name + ' attaque '+ target.player.name + ' et effectue un critique !')] + 
+                    self.attack_target(target,(self.ad+self.berzdmg)*2,'physique'))
+        else :
+            return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad+self.berzdmg,'physique')
+    
+    #lancer un sort
+    def spell(self,nomduspell,fld):
+        global F
+        F = fld
+        return {'attack':self.attack , 'double_tranchant':self.double_tranchant}[nomduspell]()
 
 class freelance(classe):
     name = 'freelance'
