@@ -170,7 +170,7 @@ def command(a): #gestion des commandes pendant un tour
         
 
 def mon_tour(): #Gestion locale du tour avec le terrain donné
-    global F
+    global F,u_alive
     strt_mss = rStartTour(jName)
     print(strt_mss)
     send_updt(['mess',strt_mss])
