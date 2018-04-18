@@ -550,5 +550,49 @@ class lancier(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 60
+    help = [('attack','attaque de base ('+str(att_cost)+' Endurance)')
+            ('jump','saute en l\'air et retombe au tour suivant sur la cible (X Endurance)')]
+    def __init__(self):
+        self.trigger = triggers()
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
+        self.lastTurnJump = False
+    def set_player(self,j):
+        self.player = j
+        self.trigger.addDmg(self.spikes)
+        self.trigger.addT(self.dodgef)
+    def __str__(self):
+        return 'Lancier '+self.player.name+' a '+str(self.hp)+' PV, une lance et saute très haut'
+    
+    #Attaque de base
+    def attack(self):
+        if(self.stamina >= self.att_cost):
+            self.stamina -= self.att_cost
+        else:
+            return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
+        target = findtarget()
+        return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
 
-classes = [guerrier,ninja,mage_blanc,barbare]
+    #saut
+    def jump(self):
+        if self.stamina < 40:
+            return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
+        self.jumptarget = findtarget()
+        self.trigger.addT(self.jumping)
+        self.trigger.addTrRes(0,self.land)
+        self.trigger.addTrRes(1,self.canjump)
+        return [('mess',self.player.name+' saute très haut')]
+    def jumping(self,source,target,amount,dtype):
+        return True,[('mess',self.player.name' est en l\'air et évite l\'attaque')]
+    def land(self,holder):
+        holder.trigger.remT(self.jumping)
+        holder.trigger.remTrRes(self.land)
+        holder.lastTurnJump = True
+        return [('mess',holder.player.name+' atterrit sur '+holder.jumptarget.player.name)]+holder.attack_target(holder.jumptarget,self.ad*2,'physique')
+    def canjump(self,holder):
+        holder.lastTurnJump = False
+        holder.trigger.remTrRes(self.land)
+        return []
+
+
+classes = [guerrier,ninja,mage_blanc,barbare,lancier]
