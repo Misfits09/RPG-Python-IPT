@@ -185,9 +185,7 @@ class guerrier(classe):
     armor = .25
     resistance = .10
     ad = 25
-    heal_points = 40
     att_cost = 30
-    heal_cost = 70
     staminaMAX = 100
     pvMAX = 150
     speed = 50
@@ -256,9 +254,7 @@ class ninja(classe):
     armor = 0
     resistance = 0
     ad = 40
-    heal_points = 15
     att_cost = 25
-    heal_cost = 50
     staminaMAX = 100
     pvMAX = 85
     speed = 150
@@ -332,9 +328,7 @@ class mage_noir(classe):
     armor = 0
     resistance = .20
     ad = 60
-    heal_points = 10
     att_cost = 50
-    heal_cost = 50
     staminaMAX = 100
     pvMAX = 100
     speed = 95
@@ -346,9 +340,7 @@ class mage_blanc(classe):
     armor = .25
     resistance = .30
     ad = 30
-    heal_points = 40
     att_cost = 25
-    heal_cost = 30
     staminaMAX = 100
     pvMAX = 100
     speed = 115
@@ -442,9 +434,7 @@ class barbare(classe):
     basearmor = .2
     baseresistance = .15
     basead = 35
-    heal_points = 10
     att_cost = 30
-    heal_cost = 70
     staminaMAX = 100
     pvMAX = 125
     speed = 75
@@ -520,9 +510,7 @@ class freelance(classe):
     armor = .1
     resistance = .1
     ad = 30
-    heal_points = 30
     att_cost = 30
-    heal_cost = 50
     staminaMAX = 100
     pvMAX = 100
     speed = 100
@@ -534,9 +522,7 @@ class barde(classe):
     armor = .10
     resistance = .15
     ad = 25
-    heal_points = 20
     att_cost = 30
-    heal_cost = 40
     staminaMAX = 100
     pvMAX = 110
     speed = 125
@@ -548,9 +534,7 @@ class mage_rouge(classe):
     armor = 0
     resistance = .10
     ad = 50
-    heal_points = 30
     att_cost = 50
-    heal_cost = 30
     staminaMAX = 100
     pvMAX = 100
     speed = 100
@@ -562,9 +546,7 @@ class lancier(classe):
     armor = .20
     resistance = .10
     ad = 40
-    heal_points = 10
     att_cost = 30
-    heal_cost = 70
     staminaMAX = 100
     pvMAX = 125
     speed = 60
