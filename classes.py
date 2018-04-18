@@ -569,4 +569,4 @@ class lancier(classe):
     pvMAX = 125
     speed = 60
 
-classes = [guerrier,ninja,mage_blanc]
+classes = [guerrier,ninja,mage_blanc,barbare]
