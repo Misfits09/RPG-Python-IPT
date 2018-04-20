@@ -551,7 +551,7 @@ class lancier(classe):
     pvMAX = 125
     speed = 60
     help = [('attack','attaque de base ('+str(att_cost)+' Endurance)')
-            ('jump','saute en l\'air et retombe au tour suivant sur la cible (X Endurance)')]
+            ('jump','saute en l\'air et retombe au tour suivant sur la cible (40 Endurance)')]
     def __init__(self):
         self.trigger = triggers()
         self.hp = self.pvMAX
@@ -577,6 +577,7 @@ class lancier(classe):
     def jump(self):
         if self.stamina < 40:
             return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
+        self.stamina = 0
         self.jumptarget = findtarget()
         self.trigger.addT(self.jumping)
         self.trigger.addTrRes(0,self.land)
