@@ -550,7 +550,7 @@ class lancier(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 60
-    help = [('attack','attaque de base ('+str(att_cost)+' Endurance)')
+    help = [('attack','attaque de base ('+str(att_cost)+' Endurance)'),
             ('jump','saute en l\'air et retombe au tour suivant sur la cible (40 Endurance)')]
     def __init__(self):
         self.trigger = triggers()
