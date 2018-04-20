@@ -78,13 +78,13 @@ class triggers():
         self.turnresolve.append((nb,f))
     def remTrRes(self,f):
         for nb,fct in self.turnresolve:
-            if fct = f:
+            if fct == f:
                 self.turnresolve.remove((nb,f))
                 break
     def dec_counter(self,f):
         L = self.onturnresolve
         for i in range(len(L)):
-            if L[i][1] = f:
+            if L[i][1] == f:
                 L[i] = (L[i][0]-1,f)
                 break
     def addHit(self,f):
@@ -438,8 +438,8 @@ class barbare(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 75
-    help = [('pasif','le barbare augmente passivement sa force s\'il est frapppé')
-            ('attack','attaque de base('+str(att_cost)+' Endurance)')
+    help = [('pasif','le barbare augmente passivement sa force s\'il est frapppé'),
+            ('attack','attaque de base('+str(att_cost)+' Endurance)'),
             ('double_tranchant','augmente l\'attaque au prix de la défense (40 Endurance) (2 tours)')]
     def __init__(self):
         self.trigger = triggers()
@@ -478,7 +478,7 @@ class barbare(classe):
         return [('mess',holder.player.name+' est de nouveau sur la défensive')]
 
     #passif: augmenter l'ad et le crit si frappé
-    def berzerk(self,source,target,amount,dtype)
+    def berzerk(self,source,target,amount,dtype):
         self.berzdmg += 5
         self.crit += 10
         return amount,[('mess','la rage de '+self.player.name+' monte')]
@@ -550,7 +550,7 @@ class lancier(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 60
-    help = [('attack','attaque de base ('+str(att_cost)+' Endurance)')
+    help = [('attack','attaque de base ('+str(att_cost)+' Endurance)'),
             ('jump','saute en l\'air et retombe au tour suivant sur la cible (X Endurance)')]
     def __init__(self):
         self.trigger = triggers()
@@ -583,7 +583,7 @@ class lancier(classe):
         self.trigger.addTrRes(1,self.canjump)
         return [('mess',self.player.name+' saute très haut')]
     def jumping(self,source,target,amount,dtype):
-        return True,[('mess',self.player.name' est en l\'air et évite l\'attaque')]
+        return True,[('mess',self.player.name + ' est en l\'air et évite l\'attaque')]
     def land(self,holder):
         holder.trigger.remT(self.jumping)
         holder.trigger.remTrRes(self.land)
