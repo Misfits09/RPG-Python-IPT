@@ -359,11 +359,11 @@ class mage_blanc(classe):
         self.trigger.addT(self.dodgef)
         
     def soin(self):
-        if self.stamina < 35:
+        if self.stamina < 30:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
         else:
             tg = findtarget()
-            self.stamina -= 35
+            self.stamina -= 30
             tg.hp += 25
             if tg.hp > tg.pvMAX:
                 tg.hp = tg.pvMAX
