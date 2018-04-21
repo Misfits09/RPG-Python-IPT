@@ -353,11 +353,13 @@ class mage_blanc(classe):
         self.hasDoneGS = False
         self.hp = self.pvMAX
         self.stamina = self.staminaMAX
+        self.godshielding = None
     def set_player(self,j):
         self.player = j
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
         
+
     def soin(self):
         if self.stamina < 30:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
@@ -368,6 +370,8 @@ class mage_blanc(classe):
             if tg.hp > tg.pvMAX:
                 tg.hp = tg.pvMAX
             return [('mess',tg.player.name + ' a été soigné par '+self.player.name+' et a maintenant '+str(tg.hp)+' PV')]
+
+
     def attack(self):
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
@@ -376,6 +380,8 @@ class mage_blanc(classe):
         target = findtarget()
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
+
+
     def godshield(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
@@ -384,15 +390,18 @@ class mage_blanc(classe):
         self.stamina -= 100
         tg = findtarget()
         tg.trigger.addT(self.isGodShielded)
-        tg.trigger.addTrRes(0,self.remGodShield)
+        self.trigger.addTrRes(0,self.remGodShield)
+        self.godshielding = tg
         self.hasDoneGS = True
         return [('mess',tg.player.name + ' a reçu une protection divine par '+self.player.name)]
     def isGodShielded(self,src,tg,amount,dtyp):
         return True,[('mess',self.player.name +' est protégé par les dieux')]
     def remGodShield(self,holder):
-        holder.trigger.remT(self.isGodShielded)
-        holder.trigger.remTrRes(self.remGodShield)
-        return [('mess','Le bouclier divin de '+holder.player.name+' est tombé')]
+        self.godshielding.trigger.remT(self.isGodShielded)
+        self.trigger.remTrRes(self.remGodShield)
+        return [('mess','Le bouclier divin de '+self.godshielding.player.name+' est tombé')]
+
+
     def reborn(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
@@ -419,10 +428,13 @@ class mage_blanc(classe):
             self.stamina += 100
             return [('mess','Personne n\'est mort donc personne à réanimer...')]
         
+
     def spell (self,nomduspell, fld):
         global F
         F = fld
         return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield,'attack': self.attack}[nomduspell]()
+
+
     def __str__(self):
         return 'Mage Blanc '+self.player.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
     
