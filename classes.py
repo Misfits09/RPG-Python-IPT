@@ -440,7 +440,6 @@ class mage_blanc(classe):
     def __str__(self):
         return 'Mage Blanc '+self.player.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
     
-    
 class barbare(classe):
     name = 'barbare'
     spike = 15
