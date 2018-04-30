@@ -160,7 +160,7 @@ def command(a): #gestion des commandes pendant un tour
             print('         - Stamina : '+str(you.stamina))
             print('         - Dégâts : '+str(you.ad)+' et une attaque coûte '+str(you.att_cost)+' d\'endurance')
             print('         - Armure : '+str(you.armor*100)+'% des dégâts physiques absorbés')
-            print('         - Résistance : '+str(you.resistance*100+'% des dégâts magiques absorbés'))
+            print('         - Résistance : '+str(you.resistance*100)+'% des dégâts magiques absorbés')
             return True
         elif(al[0] == 'forceend'):
             print('\n    -Fin de partie-   \n \n')
