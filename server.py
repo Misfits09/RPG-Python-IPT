@@ -119,6 +119,7 @@ updt_fld()
 
 # Définition des fonctions de communication
 def send(lp, mss):
+    time.sleep(.3)
     try:
         for i in lp:
             sockp[i-1].send(pickle.dumps(mss))
@@ -137,10 +138,8 @@ while 1:
     for tour in range(nbj):
         try:
             if(F.player[tour].alive):
-                time.sleep(.5)
                 send(list(range(1,nbj+1)),['mess',"\n \n >> C'est le tour de "+F.player[tour].name+" << "])
                 print('Tour de '+F.player[tour].name)
-                time.sleep(.5)
                 send([tour+1],['deb_tour',True])
                 if(get_rsp(tour+1) == ['deb_tour',True]):
                     while 1:
@@ -166,7 +165,6 @@ while 1:
                             send(list(range(1,nbj+1)),['end_game','Arrêt forcé de la partie par '+F.player[tour].name])
                         else:
                             break
-                    time.sleep(.3)
                 send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
                 if( F.nb == 1):
                     import sys
