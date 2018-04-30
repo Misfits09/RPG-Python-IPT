@@ -167,9 +167,7 @@ while 1:
                         else:
                             break
                     time.sleep(.3)
-                else:
-                    pass
-                    send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
+                send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
                 if( F.nb == 1):
                     import sys
                     send(list(range(1,nbj+1)),['end_game','Fin de la partie, le gagnant est : '+F.player[0].name])
