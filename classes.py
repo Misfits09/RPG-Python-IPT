@@ -116,18 +116,20 @@ class classe():
         for fct in self.trigger.init:
             try : 
                 a,b = fct(self,amount,dtype)
+                commlist += b
                 if a :
                     do_attk = False
-                commlist += b
+                    break
             except : pass
         if not do_attk:
             return commlist
         for fct in target.trigger.target:
             try : 
                 a,b = fct(self,target,amount,dtype)
+                commlist += b
                 if a :
                     do_attk = False
-                commlist += b
+                    break
             except : pass
         if do_attk:
             return commlist + self.hit_attack(target,amount,dtype)
