@@ -82,7 +82,7 @@ class triggers():
                 self.turnresolve.remove((nb,f))
                 break
     def dec_counter(self,f):
-        L = self.onturnresolve
+        L = self.turnresolve
         for i in range(len(L)):
             if L[i][1] == f:
                 L[i] = (L[i][0]-1,f)
