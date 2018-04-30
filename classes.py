@@ -608,6 +608,10 @@ class lancier(classe):
         holder.lastTurnJump = False
         holder.trigger.remTrRes(self.land)
         return []
-
+    
+    def spell(self,nomduspell,fld):
+        global F
+        F = fld
+        return {'attack':self.attack , 'jump':self.jump}[nomduspell]()
 
 classes = [guerrier,ninja,mage_blanc,barbare,lancier]
