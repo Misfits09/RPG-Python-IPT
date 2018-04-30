@@ -113,7 +113,12 @@ def command(a): #gestion des commandes pendant un tour
         if(al[0] == 'help'): #Commande d'aide
             print('\n       Voici la liste des commandes :')
             
-            cmdlist = [('help','Obtenir la description des commandes'),('fin','Termine votre tour'),('stats','Vous donne toutes les informations sur votre personnage'),('helpspell','Affiche vos sorts'),('spell nomdusort','Lance le sort')]
+            cmdlist = [('help','Obtenir la description des commandes'),
+                       ('fin','Termine votre tour'),
+                       ('stats','Vous donne toutes les informations sur votre personnage'),
+                       ('field','Affiche l\'état du terrain'),
+                       ('helpspell','Affiche vos sorts'),
+                       ('spell nomdusort','Lance le sort')]
             for (a,b) in cmdlist:
                 print('       -> '+a+' : '+b)
             send_updt(['mess',jName+' a demandé de l\'aide']) 
@@ -162,6 +167,11 @@ def command(a): #gestion des commandes pendant un tour
             send_updt(['mess','\n    -Fin de partie-   \n \n'])
             send_updt(['forceEND',True])
             return False
+        elif(al[0] == 'field'):
+            print('Voici l\'état du terrain : ')
+            print(str(F))
+            send_updt(['mess',F.player[jID - 1].name + ' observe le terrain'])
+            return True
         else:
             return wrong_c()
 

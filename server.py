@@ -135,45 +135,54 @@ def get_rsp(i):
 while 1:
     i = 1
     for tour in range(nbj):
-        if(F.player[tour].alive):
-            time.sleep(.5)
-            send(list(range(1,nbj+1)),['mess',"\n \n >> C'est le tour de "+F.player[tour].name+" << "])
-            print('Tour de '+F.player[tour].name)
-            time.sleep(.5)
-            send([tour+1],['deb_tour',True])
-            if(get_rsp(tour+1) == ['deb_tour',True]):
-                while 1:
-                    ms = get_rsp(tour+1)
-                    if(ms[0] == 'death'):
-                        print("\n"+ms[1].name+' est mort')
-                        a = list(range(1,nbj+1))
-                        a.remove(tour+1)
-                        send(a,['mess',ms[2]])
-                        send([ms[1].id],['death', True])
-                    elif(ms[0] == 'mess'):
-                        print("\n     "+ms[1])
-                        a = list(range(1,nbj+1))
-                        a.remove(tour+1)
-                        send(a,['mess',"    "+ms[1]])
+        try:
+            if(F.player[tour].alive):
+                time.sleep(.5)
+                send(list(range(1,nbj+1)),['mess',"\n \n >> C'est le tour de "+F.player[tour].name+" << "])
+                print('Tour de '+F.player[tour].name)
+                time.sleep(.5)
+                send([tour+1],['deb_tour',True])
+                if(get_rsp(tour+1) == ['deb_tour',True]):
+                    while 1:
+                        ms = get_rsp(tour+1)
+                        if(ms[0] == 'death'):
+                            print("\n"+ms[1].name+' est mort')
+                            a = list(range(1,nbj+1))
+                            a.remove(tour+1)
+                            send(a,['mess',ms[2]])
+                            send([ms[1].id],['death', True])
+                        elif(ms[0] == 'mess'):
+                            print("\n     "+ms[1])
+                            a = list(range(1,nbj+1))
+                            a.remove(tour+1)
+                            send(a,['mess',"    "+ms[1]])
 
-                    elif(ms[0] == 'end_tour'):
-                        F = ms[1]
-                        updt_fld()
-                        print('Fin du tour')
-                        break
-                    elif(ms[0] == 'forceEND'):
-                        send(list(range(1,nbj+1)),['end_game','Arrêt forcé de la partie par '+F.player[tour].name])
-                    else:
-                        break
-            else:
-                pass
-    send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
-"""
-    if( F.nb == 1):
-        send(list(range(1,nbj+1)),['end_game','Fin de la partie, le gagnant est : '+F.player[0].name])
-    elif( F.nb == 0):
-        send(list(range(1,nbj+1)),['end_game','Fin de la partie, le combat a été rude... Personne ne gagne ! '])
+                        elif(ms[0] == 'end_tour'):
+                            F = ms[1]
+                            updt_fld()
+                            print('Fin du tour')
+                            break
+                        elif(ms[0] == 'forceEND'):
+                            send(list(range(1,nbj+1)),['end_game','Arrêt forcé de la partie par '+F.player[tour].name])
+                        else:
+                            break
+                    time.sleep(.3)
+                else:
+                    pass
+                    send(list(range(1,nbj+1)),['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
+                if( F.nb == 1):
+                    import sys
+                    send(list(range(1,nbj+1)),['end_game','Fin de la partie, le gagnant est : '+F.player[0].name])
+                    print(str(F))
+                    input('Fin de partie')
+                    sys.exit(0)
+                elif( F.nb == 0):
+                    import sys
+                    send(list(range(1,nbj+1)),['end_game','Fin de la partie, le combat a été rude... Personne ne gagne ! '])
+                    print(str(F))
+                    input('Fin de partie')
+                    sys.exit(0)
+        except: pass
     i += 1
-"""
 
-input('Fin de partie')
+
