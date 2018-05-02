@@ -37,9 +37,9 @@ class field():
         self.nb -= 1
         return ('death',joueur)
     def __str__(self):
-        a = "Joueurs : "
+        a = "Joueurs : \n"
         for j in self.player:
-            a += str(j)+" | "
+            a += "     - "str(j)+"\n"
         return a
 
 # DEFINITION DES CLASSES #
