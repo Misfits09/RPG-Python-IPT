@@ -252,7 +252,7 @@ class guerrier(classe):
 class ninja(classe):
     name = 'ninja'
     spike = 0
-    dodge = 20
+    dodge = 30
     armor = 0
     resistance = 0
     ad = 40
