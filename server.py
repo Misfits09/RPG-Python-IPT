@@ -148,7 +148,7 @@ while 1:
                             print("\n"+ms[1].name+' est mort')
                             a = list(range(1,nbj+1))
                             a.remove(tour+1)
-                            send(a,['mess',ms[2]])
+                            send(a,['mess','    '+ms[2]])
                             send([ms[1].id],['death', True])
                         elif(ms[0] == 'mess'):
                             print("\n     "+ms[1])
