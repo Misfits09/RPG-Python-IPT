@@ -39,7 +39,7 @@ class field():
     def __str__(self):
         a = "Joueurs : \n"
         for j in self.player:
-            a += "     - "str(j)+"\n"
+            a += "     - "+str(j)+"\n"
         return a
 
 # DEFINITION DES CLASSES #
