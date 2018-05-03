@@ -16,24 +16,6 @@ import time
 -> Si un joueur attaque un autre il prend des dégats d'épine
 -> Si un joueur tue un autre il ne prend pas les dégats d'épine
 """ 
-version = "BETA 3.0"
-print("Bienvenue sur RPG "+version+"\n \n \n")
-print("Connection à un serveur :")
-r = 0
-while r == 0 :
-    try :
-        ip = str(input('IP de connection au serveur LOCAL : '))
-        port = int(input('Port de connection : '))
-        print("     Connection en cours...")
-        s = socket.socket()
-        s.connect((ip,port))
-        r = pickle.loads(s.recv(1024))
-        print("     Connection effectuée")
-        break
-    except:
-        print('Erreur dans l\' écriture de l \' IP et port OU erreur de connection')
-        pass
-
 #Définition des fonctions pour recevoir des updates du serveur et en envoyer
 def get_updt():
     up_r = pickle.loads(s.recv(1024))
@@ -44,62 +26,10 @@ def send_updt(u):
 def send_error(ider):
     send_updt(["error",ider])
 
-# Récupération du numéro de joueur
-if(r[0]=='player_id'):
-    print("\n \n Vous êtes le --> JOUEUR "+str(r[1])+" <--")
-    jID = r[1]
-    send_updt(["get_pl_id",True])
-else:
-    send_error(0)
-
-#Envoi pseudo 
-print('En attente des autres joueurs ...')
-if(get_updt() == ["get_name", True]):
-    while 1:
-        try :
-            usrnm = str(input('\n Choissisez un pseudo : '))
-            jName = usrnm
-            send_updt(["name",usrnm])
-            break
-        except:
-            send_error(2)
-
-#Récupération classe
-print('En attente des autres joueurs ...')
-if(get_updt() == ["get_classe", True]):
-    print('Choissisez parmis les classes suivantes : ')
-    for k in [j.name for j in classes]:
-        print(' -> '+k)
-    while 1:
-        try :
-            maclasse = str(input('Votre classe : '))
-            if maclasse in [j.name for j in classes]:
-                send_updt(["classe",maclasse])
-                break
-            else:
-                print('Ce nom de classe n\'est pas valide, réessayez.')
-        except:
-            send_error(2)
-#Création du terrain depuis le serveur
-print('Attente des autres joueurs...')
-up = get_updt()
-print('--> Démarrage de la partie <--')
-if(up[0] == 'fld_update'):
-    F = up[1]
-    print('Le terrain contient '+str(len(F.player))+' joueurs :')
-    for i in range(len(F.player)):
-        print(str(F.player[i]))
-    send_updt(["get_fld",True])
-    u_alive = F.player[jID-1].alive
-else:
-    send_error(1)
-
-#Partie ...
 def rStartTour(name): #Phrases aléatoires de début de tour
     l1 = ["*namej* est prêt à se battre !","Craignez la puissance *namej* :o","Cachez vous ! *namej* est prêt à jouer","*namej* va jouer mais personne n'a peur de lui ;-( ","*namej* commence son tour !","*namej* semble inarretable préparez vous à son tour"] 
     rint = random.randint(0,len(l1)-1)
     return l1[rint].replace('*namej*',name)
-
 
 def command(a): #gestion des commandes pendant un tour
     global F, u_alive
@@ -202,6 +132,78 @@ def mon_tour(): #Gestion locale du tour avec le terrain donné
         cmd = input('Que voulez vous faire ? (détails : help) : \n')
         cd = command(cmd)
         print('\n')
+
+
+version = "BETA 3.0"
+print("Bienvenue sur RPG "+version+"\n \n \n")
+print("Connection à un serveur :")
+r = 0
+while r == 0 :
+    try :
+        ip = str(input('IP de connection au serveur LOCAL : '))
+        port = int(input('Port de connection : '))
+        print("     Connection en cours...")
+        s = socket.socket()
+        s.connect((ip,port))
+        r = pickle.loads(s.recv(1024))
+        print("     Connection effectuée")
+        break
+    except:
+        print('Erreur dans l\' écriture de l \' IP et port OU erreur de connection')
+        pass
+
+# Récupération du numéro de joueur
+if(r[0]=='player_id'):
+    print("\n \n Vous êtes le --> JOUEUR "+str(r[1])+" <--")
+    jID = r[1]
+    send_updt(["get_pl_id",True])
+else:
+    send_error(0)
+
+#Envoi pseudo 
+print('En attente des autres joueurs ...')
+if(get_updt() == ["get_name", True]):
+    while 1:
+        try :
+            usrnm = str(input('\n Choissisez un pseudo : '))
+            jName = usrnm
+            send_updt(["name",usrnm])
+            break
+        except:
+            send_error(2)
+
+#Récupération classe
+print('En attente des autres joueurs ...')
+if(get_updt() == ["get_classe", True]):
+    print('Choissisez parmis les classes suivantes : ')
+    for k in [j.name for j in classes]:
+        print(' -> '+k)
+    while 1:
+        try :
+            maclasse = str(input('Votre classe : '))
+            if maclasse in [j.name for j in classes]:
+                send_updt(["classe",maclasse])
+                break
+            else:
+                print('Ce nom de classe n\'est pas valide, réessayez.')
+        except:
+            send_error(2)
+#Création du terrain depuis le serveur
+print('Attente des autres joueurs...')
+up = get_updt()
+print('--> Démarrage de la partie <--')
+if(up[0] == 'fld_update'):
+    F = up[1]
+    print('Le terrain contient '+str(len(F.player))+' joueurs :')
+    for i in range(len(F.player)):
+        print(str(F.player[i]))
+    send_updt(["get_fld",True])
+    u_alive = F.player[jID-1].alive
+else:
+    send_error(1)
+
+#Partie ...
+
 while 1:
     [t,c] = get_updt()
     if t == "mess":

@@ -27,6 +27,42 @@ def getInt(message):
         except:
             print("Mauvaise entrée : Veuillez rentrer un entier >= 2 \n ")
 
+#Définition de la fonction récupérant la vérification qu'une update est généralisée
+def isOk(cd):
+    for sp in sockp:
+        t_ms = pickle.loads(sp.recv(1024))
+        if(t_ms[0] != cd or t_ms[1] == False):
+            return False
+        elif(t_ms[0] == "error"):
+            errorlist = ['Wrong request from server : expected player_id','Wrong request from server : expected fld_update','Wrong request from server : expected get_name'] # Liste de l'ensemble des erreurs renvoyées par ID
+            print('A player got the following error : '+errorlist[t_ms[1]])
+    return True
+
+# Définition de la fonction Mise à Jour du terrain
+def updt_fld():
+    for i in range(nbj):
+        sockp[i].send(pickle.dumps(["fld_update",F]))
+        print("     Joueur "+str(i+1)+" mis à jour \n")
+
+    if(isOk('get_fld')):
+        print("     Tous à jour !")
+    else:
+        print(" !!!! FATAL ERROR !!!! ")
+
+# Définition des fonctions de communication
+def send(lp, mss):
+    time.sleep(.3)
+    try:
+        for i in lp:
+            sockp[i-1].send(pickle.dumps(mss))
+        return True
+    except:
+        return False
+def get_rsp(i):
+    try:
+        return pickle.loads(sockp[i-1].recv(1024))
+    except:
+        return ['error',0]
 
 #Initialisation de la partie
 
@@ -58,17 +94,6 @@ if(TF("Voulez vous lancer une partie ?")):
 else:
     print("Ah bah... Au revoir ?")
     input('?')
-
-#Définition de la fonction récupérant la vérification qu'une update est généralisée
-def isOk(cd):
-    for sp in sockp:
-        t_ms = pickle.loads(sp.recv(1024))
-        if(t_ms[0] != cd or t_ms[1] == False):
-            return False
-        elif(t_ms[0] == "error"):
-            errorlist = ['Wrong request from server : expected player_id','Wrong request from server : expected fld_update','Wrong request from server : expected get_name'] # Liste de l'ensemble des erreurs renvoyées par ID
-            print('A player got the following error : '+errorlist[t_ms[1]])
-    return True
 
 #   Vérification que tous ont initialisé leurs ID
 if(isOk('get_pl_id')):
@@ -104,33 +129,7 @@ for i in range(nbj):
 # Téléchargement du Field chez les clients
 print('\n \n Tour 0 : Mise a jour du terrain pour les '+str(nbj)+' joueurs')
 
-# Définition de la fonction Mise à Jour du terrain
-def updt_fld():
-    for i in range(nbj):
-        sockp[i].send(pickle.dumps(["fld_update",F]))
-        print("     Joueur "+str(i+1)+" mis à jour \n")
-
-    if(isOk('get_fld')):
-        print("     Tous à jour !")
-    else:
-        print(" !!!! FATAL ERROR !!!! ")
-
 updt_fld()
-
-# Définition des fonctions de communication
-def send(lp, mss):
-    time.sleep(.3)
-    try:
-        for i in lp:
-            sockp[i-1].send(pickle.dumps(mss))
-        return True
-    except:
-        return False
-def get_rsp(i):
-    try:
-        return pickle.loads(sockp[i-1].recv(1024))
-    except:
-        return ['error',0]
 
 ###### PARTIE #######
 while 1:
