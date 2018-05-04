@@ -15,7 +15,6 @@ def findtarget():
 
 class joueur():
     alive = True
-    F = None
     classe = None
     def __init__(self,i): 
         self.id,self.name = i,str(i)
