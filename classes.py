@@ -47,14 +47,14 @@ class field():
             a +='\n' + str(j)+" | "
         return a
 
-def send(mss, p):
+def sendc(mss, p):
     time.sleep(.3)
     try:
         p.socket.send(pickle.dumps(mss))
         return True
     except:
         return False
-def get_rsp(j):
+def get_rspc(j):
     try:
         return pickle.loads(j.socket.recv(1024))
     except:
@@ -63,16 +63,16 @@ def get_rsp(j):
 def findtarget(j):
     global F
     while 1:
-        send(['get_c','nom de la cible : '],j)
-        useless,name = get_rsp(j)
+        sendc(['get_c','nom de la cible : '],j)
+        useless,name = get_rspc(j)
         plFound = False
         for pl in F.player:
             if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
                 plFound = True
-                send(['mess','\n  Vous ciblez '+pl.name],j)
+                sendc(['mess','\n  Vous ciblez '+pl.name],j)
                 return pl.classe
         if (not plFound):
-            send(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
+            sendc(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
 class triggers():
     def __init__(self):
         self.target = []
@@ -430,8 +430,8 @@ class mage_blanc(classe):
         for p in F.player:
             if(p.alive == False):
                 while 1:
-                    send(['get_c','nom de la cible : '],j)
-                    useless,name = get_rsp(j)
+                    sendc(['get_c','nom de la cible : '],self.player)
+                    useless,name = get_rspc(self.player)
                     plFound = False
                     for pl in F.player:
                         if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
@@ -521,7 +521,7 @@ class barbare(classe):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget()
+        target = findtarget(self.player)
         rd = random.randint(1,100)
         if rd <= self.crit:
             return ([('mess', self.player.name + ' attaque '+ target.player.name + ' et effectue un critique !')] + 
@@ -602,7 +602,7 @@ class lancier(classe):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget()
+        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
 
     #saut
@@ -610,7 +610,7 @@ class lancier(classe):
         if self.stamina < 40:
             return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         self.stamina = 0
-        self.jumptarget = findtarget()
+        self.jumptarget = findtarget(self.player)
         self.trigger.addT(self.jumping)
         self.trigger.addTrRes(0,self.land)
         self.trigger.addTrRes(1,self.canjump)
