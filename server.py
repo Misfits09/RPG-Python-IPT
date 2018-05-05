@@ -27,42 +27,6 @@ def getInt(message):
         except:
             print("Mauvaise entrée : Veuillez rentrer un entier >= 2 \n ")
 
-#Définition de la fonction récupérant la vérification qu'une update est généralisée
-def isOk(cd):
-    for sp in sockp:
-        t_ms = pickle.loads(sp.recv(1024))
-        if(t_ms[0] != cd or t_ms[1] == False):
-            return False
-        elif(t_ms[0] == "error"):
-            errorlist = ['Wrong request from server : expected player_id','Wrong request from server : expected fld_update','Wrong request from server : expected get_name'] # Liste de l'ensemble des erreurs renvoyées par ID
-            print('A player got the following error : '+errorlist[t_ms[1]])
-    return True
-
-# Définition de la fonction Mise à Jour du terrain
-def updt_fld():
-    for i in range(nbj):
-        sockp[i].send(pickle.dumps(["fld_update",F]))
-        print("     Joueur "+str(i+1)+" mis à jour \n")
-
-    if(isOk('get_fld')):
-        print("     Tous à jour !")
-    else:
-        print(" !!!! FATAL ERROR !!!! ")
-
-# Définition des fonctions de communication
-def send(lp, mss):
-    time.sleep(.3)
-    try:
-        for i in lp:
-            sockp[i-1].send(pickle.dumps(mss))
-        return True
-    except:
-        return False
-def get_rsp(i):
-    try:
-        return pickle.loads(sockp[i-1].recv(1024))
-    except:
-        return ['error',0]
 
 #Initialisation de la partie
 
@@ -95,7 +59,6 @@ else:
     print("Ah bah... Au revoir ?")
     input('?')
 
-<<<<<<< HEAD
 #Définition de la fonction récupérant la vérification qu'une update est généralisée
 def isOk(cd):
     for j in p:
@@ -108,8 +71,6 @@ def isOk(cd):
             print('A player got the following error : '+errorlist[t_ms[1]])
     return True
 
-=======
->>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
 #   Vérification que tous ont initialisé leurs ID
 if(isOk('get_pl_id')):
     print("     Tous connectés !")
@@ -139,7 +100,6 @@ for j in p:
         else:
             j.set_classe('guerrier')
     except:
-<<<<<<< HEAD
         j.set_classe('guerrier')
 
 # Définition des fonctions de communication
@@ -162,15 +122,6 @@ def get_rsp(j):
     except:
         return ['error',0]
 
-=======
-        F.player[i].set_classe('guerrier')
-
-# Téléchargement du Field chez les clients
-print('\n \n Tour 0 : Mise a jour du terrain pour les '+str(nbj)+' joueurs')
-
-updt_fld()
-
->>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
 ###### PARTIE #######
 
 def command(a,j): #gestion des commandes pendant un tour
@@ -260,7 +211,6 @@ send(['mess','\n \n \n          ---------------- \n     DEBUT DE LA PARTIE \n   
 
 while 1:
     i = 1
-<<<<<<< HEAD
     for j in p:
         if True:
             if(j.alive):
@@ -276,33 +226,6 @@ while 1:
                             send(['mess','Vous êtes mort en attaquant'],[j])
                             send(['mess', j.name+' est mort au combat'])
                             j.alive = False #Juste pour être sûre xD
-=======
-    for tour in range(nbj):
-        try:
-            if(F.player[tour].alive):
-                send(list(range(1,nbj+1)),['mess',"\n \n >> C'est le tour de "+F.player[tour].name+" << "])
-                print('Tour de '+F.player[tour].name)
-                send([tour+1],['deb_tour',True])
-                if(get_rsp(tour+1) == ['deb_tour',True]):
-                    while 1:
-                        ms = get_rsp(tour+1)
-                        if(ms[0] == 'death'):
-                            print("\n"+ms[1].name+' est mort')
-                            a = list(range(1,nbj+1))
-                            a.remove(tour+1)
-                            send(a,['mess','    '+ms[2]])
-                            send([ms[1].id],['death', True])
-                        elif(ms[0] == 'mess'):
-                            print("\n     "+ms[1])
-                            a = list(range(1,nbj+1))
-                            a.remove(tour+1)
-                            send(a,['mess',"    "+ms[1]])
-
-                        elif(ms[0] == 'end_tour'):
-                            F = ms[1]
-                            updt_fld()
-                            print('Fin du tour')
->>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
                             break
                         else:
                             send(['mess',' Vous avez tué '+obj.name],[j])
