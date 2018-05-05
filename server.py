@@ -123,9 +123,10 @@ def get_rsp(j):
 ###### PARTIE #######
 
 def command(a,j): #gestion des commandes pendant un tour
+    other_pl = [y for y in p if y != j]
     def wrong_c(j):
         send(['mess','\n Commande incomprise '+a+' : Vérifiez votre commande (un seul espace entre chaque argument)'],[j])
-        send(['mess',j.name+' a voulu faire quelque chose d\' impossible'])
+        send(['mess',j.name+' a voulu faire quelque chose d\' impossible'],other_pl)
         print('Mauvaise commande de '+j.name+' : '+a)
         return True
     a = a.strip().casefold()
@@ -144,7 +145,7 @@ def command(a,j): #gestion des commandes pendant un tour
             for (a,b) in cmdlist:
                 helpstr += ('\n       -> '+a+' : '+b)
             send(['mess',helpstr],[j])
-            send(['mess',j.name+' a demandé de l\'aide'],(y for y in p if y.id != j.id))
+            send(['mess',j.name+' a demandé de l\'aide'],other_pl)
             return True 
         elif(al[0] == 'helpspell'):
             send(['mess','Voici vos sorts : \n'])
@@ -152,7 +153,7 @@ def command(a,j): #gestion des commandes pendant un tour
             for nm,desc in j.classe.help:
                 helpstr += '\n       -> '+nm+' : '+desc
             send(['mess',helpstr],[j])
-            send(['mess',j.name+' consulte son livre de sorts'],(y for y in p if y.id != j.id)) 
+            send(['mess',j.name+' consulte son livre de sorts'],other_pl) 
             return True
         elif(al[0] == 'fin'):
             print('\n    -Fin de votre tour-   \n \n')
@@ -164,12 +165,12 @@ def command(a,j): #gestion des commandes pendant un tour
                 if typeR == 'death':
                     if(obj == j): #Si le joueur meurt de lui même
                         send(['mess','Vous êtes mort en attaquant'],[j])
-                        send(['mess', j.name+' est mort au combat'])
+                        send(['mess', j.name+' est mort au combat'],other_pl)
                         j.alive = False #Juste pour être sûre xD
                         return False
                     else:
                         send(['mess',' Vous avez tué '+obj.name],[j])
-                        send(['mess',j.name+' a tué '+obj.name])
+                        send(['mess',j.name+' a tué '+obj.name],other_pl)
                 elif typeR == 'mess':
                     send(['mess',obj])
             return True
@@ -193,7 +194,7 @@ def command(a,j): #gestion des commandes pendant un tour
         elif(al[0] == 'field'):
             strFld = 'Voici l\'état du terrain : ' + str(F)
             send(['mess',strFld])
-            send(['mess',j.name + ' observe le terrain'],(y for y in p if y.id != j.id))
+            send(['mess',j.name + ' observe le terrain'],other_pl)
             return True
         else:
             return wrong_c(j)
@@ -212,6 +213,7 @@ while 1:
     for j in p:
         if True:
             if(j.alive):
+                other_pl = [y for y in p if y != j]
                 j.restore_stamina()
                 send(['mess',"\n \n >> C'est le tour de "+j.name+" << "])
                 print('Tour de '+j.name)
@@ -222,12 +224,12 @@ while 1:
                     if typeR == 'death':
                         if(obj == j): #Si le joueur meurt de lui même
                             send(['mess','Vous êtes mort en attaquant'],[j])
-                            send(['mess', j.name+' est mort au combat'])
+                            send(['mess', j.name+' est mort au combat'],other_pl)
                             j.alive = False #Juste pour être sûre xD
                             break
                         else:
                             send(['mess',' Vous avez tué '+obj.name],[j])
-                            send(['mess',j.name+' a tué '+obj.name])
+                            send(['mess',j.name+' a tué '+obj.name],other_pl)
                     elif typeR == 'mess':
                         send(['mess',obj])
                 cd = True    
