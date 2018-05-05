@@ -1,4 +1,5 @@
 import random
+<<<<<<< HEAD
 import pickle
 import socket
 import time
@@ -6,6 +7,26 @@ class joueur():
     alive = True
     F = None
     def __init__(self,i,sk): 
+=======
+
+def findtarget():
+    global F
+    while 1:
+        name = str(input('nom de la cible : '))
+        plFound = False
+        for pl in F.player:
+            if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
+                plFound = True
+                print('\n  Vous ciblez '+pl.name)
+                return pl.classe
+        if (not plFound):
+            print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
+
+class joueur():
+    alive = True
+    classe = None
+    def __init__(self,i): 
+>>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
         self.id,self.name = i,str(i)
         self.alive = True
         self.F = None
@@ -42,9 +63,15 @@ class field():
         self.nb -= 1
         return ('death',joueur)
     def __str__(self):
+<<<<<<< HEAD
         a = "\n Joueurs : "
         for j in self.player:
             a +='\n' + str(j)+" | "
+=======
+        a = "Joueurs : \n"
+        for j in self.player:
+            a += "     - "+str(j)+"\n"
+>>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
         return a
 
 def send(mss, p):
@@ -60,6 +87,7 @@ def get_rsp(j):
     except:
         return ['error',0]
 # DEFINITION DES CLASSES #
+<<<<<<< HEAD
 def findtarget(j):
     global F
     while 1:
@@ -73,6 +101,8 @@ def findtarget(j):
                 return pl.classe
         if (not plFound):
             send(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
+=======
+>>>>>>> 9937119b546486b5793fcc0fba16bbe2fd464c88
 class triggers():
     def __init__(self):
         self.target = []
@@ -113,8 +143,6 @@ class triggers():
         return str((self.init,self.target,self.damage,self.turnresolve,self.hit))
 
 class classe():
-        
-    
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
         commlist = []
@@ -220,6 +248,7 @@ class guerrier(classe):
         self.player = j
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
+    
     #bloquer la prochaine attaque (dmgtrigger sur soi)
     def block(self):
         if self.stamina < 40 :
@@ -270,7 +299,7 @@ class guerrier(classe):
 class ninja(classe):
     name = 'ninja'
     spike = 0
-    dodge = 20
+    dodge = 30
     armor = 0
     resistance = 0
     ad = 40
@@ -291,6 +320,7 @@ class ninja(classe):
         self.player = j
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
+    
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
         if self.stamina < 50 :
@@ -313,7 +343,6 @@ class ninja(classe):
         holder.trigger.remTrRes(self.endHiding)
         holder.trigger.remT(self.hiding)
         return [('mess', holder.player.name + ' est sorti de sa cachette')]
-
 
     def attack(self):
         if(self.stamina >= self.att_cost):
@@ -379,7 +408,6 @@ class mage_blanc(classe):
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
         
-
     def soin(self):
         if self.stamina < 30:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
@@ -391,7 +419,6 @@ class mage_blanc(classe):
                 tg.hp = tg.pvMAX
             return [('mess',tg.player.name + ' a été soigné par '+self.player.name+' et a maintenant '+str(tg.hp)+' PV')]
 
-
     def attack(self):
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
@@ -400,8 +427,6 @@ class mage_blanc(classe):
         target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
-
-
     def godshield(self):
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
@@ -420,7 +445,6 @@ class mage_blanc(classe):
         self.godshielding.trigger.remT(self.isGodShielded)
         self.trigger.remTrRes(self.remGodShield)
         return [('mess','Le bouclier divin de '+self.godshielding.player.name+' est tombé')]
-
 
     def reborn(self):
         if self.stamina <  100:
@@ -448,13 +472,11 @@ class mage_blanc(classe):
         else:  
             self.stamina += 100
             return [('mess','Personne n\'est mort donc personne à réanimer...')]
-        
 
     def spell (self,nomduspell, fld):
         global F
         F = fld
         return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield,'attack': self.attack}[nomduspell]()
-
 
     def __str__(self):
         return 'Mage Blanc '+self.player.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
