@@ -46,12 +46,10 @@ if(TF("Voulez vous lancer une partie ?")):
     s.bind(('',port))
     s.listen()
     p = []
-    sockp = []
     for i in range(nbj):
         print("     Attente joueur "+str(i+1))
         (sock,address) = s.accept()
         p.append(joueur(i+1,sock))
-        sockp.append(sock)
         sock.send(pickle.dumps(["player_id",i+1]))
         print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
     F = field(p)
