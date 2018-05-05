@@ -1,11 +1,16 @@
 import random
-
+import pickle
+import socket
+import time
 class joueur():
     alive = True
     F = None
-    classe = None
-    def __init__(self,i): 
+    def __init__(self,i,sk): 
         self.id,self.name = i,str(i)
+        self.alive = True
+        self.F = None
+        self.classe = None
+        self.socket = sk
     def set_field(self,fi):
         self.F = fi
     def set_classe(self,nomclasse):
@@ -37,24 +42,37 @@ class field():
         self.nb -= 1
         return ('death',joueur)
     def __str__(self):
-        a = "Joueurs : "
+        a = "\n Joueurs : "
         for j in self.player:
-            a += str(j)+" | "
+            a +='\n' + str(j)+" | "
         return a
 
+def send(mss, p):
+    time.sleep(.3)
+    try:
+        p.socket.send(pickle.dumps(mss))
+        return True
+    except:
+        return False
+def get_rsp(j):
+    try:
+        return pickle.loads(j.socket.recv(1024))
+    except:
+        return ['error',0]
 # DEFINITION DES CLASSES #
-def findtarget():
+def findtarget(j):
     global F
     while 1:
-        name = str(input('nom de la cible : '))
+        send(['get_c','nom de la cible : '],j)
+        useless,name = get_rsp(j)
         plFound = False
         for pl in F.player:
             if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
                 plFound = True
-                print('\n  Vous ciblez '+pl.name)
+                send(['mess','\n  Vous ciblez '+pl.name],j)
                 return pl.classe
         if (not plFound):
-            print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort')
+            send(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
 class triggers():
     def __init__(self):
         self.target = []
@@ -223,7 +241,7 @@ class guerrier(classe):
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         self.stamina -= 40
-        pl = findtarget()
+        pl = findtarget(self.player)
         pl.trigger.addT(self.protection)
         return [('mess',self.player.name+' protège '+pl.player.name)]
     def protection(self,source,target,amount,dtype):
@@ -243,7 +261,7 @@ class guerrier(classe):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget()
+        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
     def __str__(self):
@@ -302,7 +320,7 @@ class ninja(classe):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget()
+        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
     def esquive(self):
@@ -366,7 +384,7 @@ class mage_blanc(classe):
         if self.stamina < 30:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
         else:
-            tg = findtarget()
+            tg = findtarget(self.player)
             self.stamina -= 30
             tg.hp += 25
             if tg.hp > tg.pvMAX:
@@ -379,7 +397,7 @@ class mage_blanc(classe):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget()
+        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
 
@@ -390,7 +408,7 @@ class mage_blanc(classe):
         elif self.hasDoneGS:
             return [('mess',self.player.name + ' ne peut pas canaliser un nouveau bouclier divin ')]
         self.stamina -= 100
-        tg = findtarget()
+        tg = findtarget(self.player)
         tg.trigger.addT(self.isGodShielded)
         self.trigger.addTrRes(0,self.remGodShield)
         self.godshielding = tg
@@ -412,7 +430,8 @@ class mage_blanc(classe):
         for p in F.player:
             if(p.alive == False):
                 while 1:
-                    name = str(input('Nom du mort : '))
+                    send(['get_c','nom de la cible : '],j)
+                    useless,name = get_rsp(j)
                     plFound = False
                     for pl in F.player:
                         if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
