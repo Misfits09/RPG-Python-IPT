@@ -80,18 +80,18 @@ else:
 # Récupération des usernames
 for j in p:
     j.socket.send(pickle.dumps(["get_name",True]))
-    print("     Récupération nom du joueur "+str(i+1)+"\n")
+    print("     Récupération nom du joueur "+str(j.id)+"\n")
     mss = pickle.loads(j.socket.recv(1024))
     try :
         if mss[0] == "name":
             j.name = mss[1]
     except:
-        j.name = 'SansNom'+str(i+1)
+        j.name = 'SansNom'+str(j.id)
 
 #Récupération des classes
 for j in p:
     j.socket.send(pickle.dumps(["get_classe",True]))
-    print("     Récupération des classes du joueur "+str(i+1)+"\n")
+    print("     Récupération des classes du joueur "+str(j.id)+"\n")
     mss = pickle.loads(j.socket.recv(1024)) # de type ['classe', nomdelaclasse]
     try :
         if (mss[0] == "classe"):
