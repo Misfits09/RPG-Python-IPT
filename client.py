@@ -48,7 +48,6 @@ def send_error(ider):
 # Récupération du numéro de joueur
 if(r[0]=='player_id'):
     print("\n \n Vous êtes le --> JOUEUR "+str(r[1])+" <--")
-    jID = r[1]
     send_updt(["get_pl_id",True])
 else:
     send_error(0)
