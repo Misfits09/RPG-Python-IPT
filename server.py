@@ -182,7 +182,7 @@ def command(a,j): #gestion des commandes pendant un tour
             statStr +='         - PV : '+str(you.hp) + '\n'
             statStr +='         - Stamina : '+str(you.stamina) + '\n'
             statStr +='         - Dégâts : '+str(you.ad)+' et une attaque coûte '+str(you.att_cost)+' d\'endurance' + '\n'
-            statStr +='        - Armure : '+str(you.armor*100)+'% des dégâts physiques absorbés' + '\n'
+            statStr +='         - Armure : '+str(you.armor*100)+'% des dégâts physiques absorbés' + '\n'
             statStr +='         - Résistance : '+str(you.resistance*100)+'% des dégâts magiques absorbés' + '\n'
             send(['mess',statStr],[j])
             return True

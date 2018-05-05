@@ -59,6 +59,7 @@ def get_rspc(j):
         return pickle.loads(j.socket.recv(1024))
     except:
         return ['error',0]
+
 # DEFINITION DES CLASSES #
 def findtarget(j):
     global F
@@ -73,6 +74,7 @@ def findtarget(j):
                 return pl.classe
         if (not plFound):
             sendc(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
+
 class triggers():
     def __init__(self):
         self.target = []
@@ -113,8 +115,6 @@ class triggers():
         return str((self.init,self.target,self.damage,self.turnresolve,self.hit))
 
 class classe():
-        
-    
     #appelée à chaque début de tour du joueur
     def new_turn(self): 
         commlist = []
