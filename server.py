@@ -160,7 +160,8 @@ def command(a,j): #gestion des commandes pendant un tour
             send(['mess',j.name+' a fini de se battre'])
             return False
         elif(al[0] == 'spell'):
-            toshow = j.classe.spell(al[1],F)
+            try: toshow = j.classe.spell(al[1],F)
+            except: return wrong_c(j)
             for typeR,obj in toshow:
                 if typeR == 'death':
                     if(obj == j): #Si le joueur meurt de lui même
@@ -169,8 +170,11 @@ def command(a,j): #gestion des commandes pendant un tour
                         j.alive = False #Juste pour être sûre xD
                         return False
                     else:
+                        other_pl2 = other_pl.copy()
+                        other_pl2.remove(obj)
                         send(['mess',' Vous avez tué '+obj.name],[j])
-                        send(['mess',j.name+' a tué '+obj.name],other_pl)
+                        send(['mess','Vous avez ete tue par '+j.name],[obj])
+                        send(['mess',j.name+' a tué '+obj.name],other_pl2)
                 elif typeR == 'mess':
                     send(['mess',obj])
             return True
@@ -189,7 +193,7 @@ def command(a,j): #gestion des commandes pendant un tour
         elif(al[0] == 'forceend'):
             send(['mess','\n    -Fin de partie-   \n \n'])
             print('\n    -Fin de partie-   \n')
-            send(['forceEND',True])
+            send(['forceEND',j])
             return False
         elif(al[0] == 'field'):
             strFld = 'Voici l\'état du terrain : ' + str(F)

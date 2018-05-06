@@ -97,6 +97,9 @@ while 1:
     elif t == "end_game":
         print(up[1])
         break
+    elif t == "forceEND":
+        print('arret force de la partie par '+up[1].name)
+        break
     else:
         print(str(up))
 
