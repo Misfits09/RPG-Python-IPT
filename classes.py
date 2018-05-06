@@ -44,7 +44,7 @@ class field():
     def __str__(self):
         a = "\n Joueurs : "
         for j in self.player:
-            a +='\n' + str(j)+" | "
+            a +='\n' + str(j)
         return a
 
 def sendc(mss, p):

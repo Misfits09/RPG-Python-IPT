@@ -142,7 +142,7 @@ def command(a,j): #gestion des commandes pendant un tour
             send(['mess',j.name+' a demandé de l\'aide'],other_pl)
             return True 
         elif(al[0] == 'helpspell'):
-            send(['mess','Voici vos sorts : \n'])
+            send(['mess','Voici vos sorts : \n'],[j])
             helpstr = ''
             for nm,desc in j.classe.help:
                 helpstr += '\n       -> '+nm+' : '+desc
@@ -205,7 +205,8 @@ def rStartTour(name): #Phrases aléatoires de début de tour
     return l1[rint].replace('*namej*',name)
 
 send(['mess','\n \n \n          ---------------- \n     DEBUT DE LA PARTIE \n            ----------------\n \n'])
-
+strFld = 'Voici l\'état du terrain en ce début de partie : '+j.name+' : ' + str(F) + '\n \n \n'
+send(['mess',strFld])
 while 1:
     i = 1
     for j in p:
@@ -232,11 +233,11 @@ while 1:
                         send(['mess',obj])
                 cd = True    
                 while cd:
-                    send(['get_c','Que souhaitez vous faire (help pour plus d\'infos) ?'],[j])
+                    send(['get_c','Que souhaitez vous faire (help pour plus d\'infos) ?  '],[j])
                     ms = get_rsp(j)
                     if ms[0] == 'cmd':
                         cd = command(ms[1],j)
-                strFld = 'Voici l\'état du terrain à la fin du Tour de '+j.name+' : ' + str(F)
+                strFld = '\n \n Voici l\'état du terrain à la fin du Tour de '+j.name+' : ' + str(F)
                 send(['mess',strFld])
         else: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
