@@ -99,21 +99,15 @@ for j in p:
             j.set_classe('guerrier')
     except:
         j.set_classe('guerrier')
-
 # Définition des fonctions de communication
-def send(mss, lp = None):
+def send(mss, lp = p):
     time.sleep(.3)
-    if lp == None :
-        for j in p:
+    try:
+        for j in lp :
             j.socket.send(pickle.dumps(mss))
-            return True
-    else :
-        try:
-            for j in lp :
-                j.socket.send(pickle.dumps(mss))
-            return True
-        except:
-            return False
+        return True
+    except:
+        return False
 def get_rsp(j):
     try:
         return pickle.loads(j.socket.recv(1024))

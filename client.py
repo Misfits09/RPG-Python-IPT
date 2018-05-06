@@ -80,7 +80,7 @@ if(get_updt() == ["get_classe", True]):
                 print('Ce nom de classe n\'est pas valide, réessayez.')
         except:
             send_error(2)
-
+print('En attente des autres joueurs ...')
 
 while 1:
     up = get_updt()
