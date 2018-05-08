@@ -470,7 +470,7 @@ class barbare(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 75
-    help = [('pasif','le barbare augmente passivement sa force s\'il est frapppé'),
+    help = [('passif','le barbare augmente passivement sa force s\'il est frapppé'),
             ('attack','attaque de base('+str(att_cost)+' Endurance)'),
             ('double_tranchant','augmente l\'attaque au prix de la défense (40 Endurance) (2 tours)')]
     def __init__(self):

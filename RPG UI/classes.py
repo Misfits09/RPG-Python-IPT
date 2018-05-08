@@ -479,7 +479,7 @@ class barbare(classe):
     staminaMAX = 100
     pvMAX = 125
     speed = 75
-    help = [('pasif',0,'le barbare augmente passivement sa force s\'il est frapppé'),
+    help = [('passif',0,'le barbare augmente passivement sa force s\'il est frapppé'),
             ('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
             ('double_tranchant',40,'augmente l\'attaque au prix de la défense ')]
     def __init__(self):
@@ -537,13 +537,13 @@ class barbare(classe):
                     self.attack_target(target,(self.ad+self.berzdmg)*2,'physique'))
         else :
             return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad+self.berzdmg,'physique')
-    def pasif(self):
+    def passif(self):
         return [('mess','Le passif n\'est pas activable')]
     #lancer un sort
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        return {'attack':self.attack , 'double_tranchant':self.double_tranchant, 'pasif':self.pasif}[nomduspell]()
+        return {'attack':self.attack , 'double_tranchant':self.double_tranchant, 'passif':self.passif}[nomduspell]()
 
 class freelance(classe):
     name = 'freelance'
