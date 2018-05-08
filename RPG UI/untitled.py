@@ -18,7 +18,7 @@ class Ui_RPG(object):
         RPG.setAutoFillBackground(False)
         RPG.setStyleSheet("")
         self.centralwidget = QtWidgets.QWidget(RPG)
-        self.centralwidget.setStyleSheet("background:url(C:/Users/nathp/Documents/RPG UI/tel.png)")
+        self.centralwidget.setStyleSheet("background:url(./tel.png)")
         self.centralwidget.setObjectName("centralwidget")
         self.Titre = QtWidgets.QLabel(self.centralwidget)
         self.Titre.setGeometry(QtCore.QRect(0, 0, 601, 51))
