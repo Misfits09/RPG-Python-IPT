@@ -6,6 +6,7 @@ import pickle
 from builtins import *
 import random
 from classes import *
+from threading import Thread,Barrier
 #DÃ©finition des fonctions
 def TF(message):
     while 1:
@@ -70,28 +71,35 @@ def isOk(cd):
 
 
 # Récupération des usernames
-for j in p:
-    print("     Récupération nom du joueur "+str(j.id)+"\n")
+def get_infos(j,b):
     mss = pickle.loads(j.socket.recv(1024))
     try :
         if mss[0] == "name":
             j.name = mss[1]
+            print('Joueur '+str(j.id)+' s\'appelle '+mss[1]+'\n')
     except:
         j.name = 'SansNom'+str(j.id)
-
-#Récupération des classes
-for j in p:
     j.socket.send(pickle.dumps(["get_classe",True]))
-    print("     Récupération des classes du joueur "+str(j.id)+"\n")
     mss = pickle.loads(j.socket.recv(1024)) # de type ['classe', nomdelaclasse]
     try :
         if (mss[0] == "classe"):
-            print('Classe recue : \'',mss[1],'\' ')
+            print('Classe recue : \'',mss[1],'\' par joueur '+str(j.id))
             j.set_classe(mss[1].strip().casefold())
         else:
             j.set_classe('guerrier')
     except:
         j.set_classe('guerrier')
+    i = b.wait()
+    if i == 0:
+        print('usernames et classes recuperes')
+
+b = Barrier(len(p)+1)
+th = [Thread(target=get_infos,args=(j,b)) for j in p]
+for t in th:
+    t.start()
+i = b.wait()
+if i == 0:
+        print('usernames et classes recuperes')
 # Définition des fonctions de communication
 def send(mss, lp = p):
     print(str(mss))
