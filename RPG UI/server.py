@@ -152,7 +152,6 @@ def command(a,j): #gestion des commandes pendant un tour
                         send(['mess','Vous êtes mort en attaquant'],[j])
                         send(['mess', j.name+' est mort au combat'],other_pl)
                         j.alive = False #Juste pour être sûre xD
-                        return False
                     else:
                         other_pl2 = other_pl.copy()
                         other_pl2.remove(obj)
@@ -161,7 +160,7 @@ def command(a,j): #gestion des commandes pendant un tour
                         send(['mess',j.name+' a tué '+obj.name],other_pl2)
                 elif typeR == 'mess':
                     send(['mess',obj])
-            return True
+            return j.alive
 
         elif(al[0] == 'stats'): # A REVOIR #
             you = j.classe
