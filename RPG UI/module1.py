@@ -58,7 +58,7 @@ class MainWindow(Ui_RPG):
         print(str(['cmd','spell '+spellname]))
         self.send_updt(['cmd','spell '+spellname])
         app.processEvents()
-        self.infiniteloop()
+
     def showHelp(self):
         superstr = ""
         for a,b,c in self.mySpell:
