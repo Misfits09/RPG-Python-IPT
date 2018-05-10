@@ -2,6 +2,8 @@ import random
 import pickle
 import socket
 import time
+class Empty_fld(Exception):
+    pass
 class joueur():
     alive = True
     F = None
@@ -69,15 +71,17 @@ def get_rspc(j):
         return ['error',0]
 
 # DEFINITION DES CLASSES #
-def findtarget(j):
+def findtarget(j,alive = True):
     global F
+    namelist = [x.name for x in F.player if x.alive == alive]
+    if namelist == []:
+        raise Empty_fld
     while 1:
-        namelist = [x.name for x in F.player]
         sendc(['get_c','target',namelist ],j)
         useless,name = get_rspc(j)
         plFound = False
         for pl in F.player:
-            if(pl.name.casefold().strip() == name.casefold().strip() and pl.alive):
+            if(pl.name.casefold().strip() == name.casefold().strip() and (pl.alive == alive)):
                 plFound = True
                 sendc(['mess','\n  Vous ciblez '+pl.name],j)
                 return pl.classe
@@ -247,10 +251,11 @@ class guerrier(classe):
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
     def protect (self):
+        try : pl = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         self.stamina -= 40
-        pl = findtarget(self.player)
         pl.trigger.addT(self.protection)
         return [('mess',self.player.name+' protège '+pl.player.name)]
     def protection(self,source,target,amount,dtype):
@@ -266,11 +271,12 @@ class guerrier(classe):
     
     #attaque de base
     def attack(self):
+        try : target = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
     def __str__(self):
@@ -325,11 +331,12 @@ class ninja(classe):
 
 
     def attack(self):
+        try : target = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
     
     def esquive(self):
@@ -393,7 +400,8 @@ class mage_blanc(classe):
         if self.stamina < 30:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
         else:
-            tg = findtarget(self.player)
+            try : tg = findtarget(self.player)
+            except Empty_fld : return [('mess','Aucune cible disponible')]
             self.stamina -= 30
             tg.hp += 25
             if tg.hp > tg.pvMAX:
@@ -402,22 +410,24 @@ class mage_blanc(classe):
 
 
     def attack(self):
+        try : target = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'magique')
     
 
 
     def godshield(self):
+        try : tg = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
         elif self.hasDoneGS:
             return [('mess',self.player.name + ' ne peut pas canaliser un nouveau bouclier divin ')]
         self.stamina -= 100
-        tg = findtarget(self.player)
         tg.trigger.addT(self.isGodShielded)
         self.trigger.addTrRes(0,self.remGodShield)
         self.godshielding = tg
@@ -432,31 +442,16 @@ class mage_blanc(classe):
 
 
     def reborn(self):
+        try : pl = findtarget(self.player,False)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         self.stamina -= 100
-        global F
-        for p in F.player:
-            if(p.alive == False):
-                while 1:
-                    sendc(['get_c','deadtarget'],self.player)
-                    useless,name = get_rspc(self.player)
-                    plFound = False
-                    for pl in F.player:
-                        if(pl.name.casefold().strip() == name.casefold().strip() and (not pl.alive)):
-                            plFound = True
-                            print('\n  Vous réanimez '+pl.name)
-                            pl.alive = True
-                            pl.classe.hp = int(pl.classe.pvMAX/2)
-                            F.nb += 1
-                            return [('mess',pl.name+' est réanimé par '+self.player.name)]
-                            # TODO
-                    if (not plFound):
-                        print('\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il n\'est pas mort')
-                break
-        else:  
-            self.stamina += 100
-            return [('mess','Personne n\'est mort donc personne à réanimer...')]
+        print('\n  Vous réanimez '+pl.name)
+        pl.alive = True
+        pl.classe.hp = int(pl.classe.pvMAX/2)
+        F.nb += 1
+        return [('mess',pl.name+' est réanimé par '+self.player.name)]
         
 
     def spell (self,nomduspell, fld):
@@ -526,11 +521,12 @@ class barbare(classe):
     
     #attaque de base
     def attack(self):
+        try : target = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget(self.player)
         rd = random.randint(1,100)
         if rd <= self.crit:
             return ([('mess', self.player.name + ' attaque '+ target.player.name + ' et effectue un critique !')] + 
@@ -608,19 +604,21 @@ class lancier(classe):
     
     #Attaque de base
     def attack(self):
+        try : target = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.player.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
-        target = findtarget(self.player)
         return [('mess', self.player.name + ' attaque '+ target.player.name )] + self.attack_target(target,self.ad,'physique')
 
     #saut
     def jump(self):
+        try : jumptarget = findtarget(self.player)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
         if self.stamina < 40:
             return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         self.stamina = 0
-        self.jumptarget = findtarget(self.player)
         self.trigger.addT(self.jumping)
         self.trigger.addTrRes(0,self.land)
         self.trigger.addTrRes(1,self.canjump)
