@@ -26,6 +26,7 @@ class MainWindow(Ui_RPG):
         self.gameFrame.hide()
         self.playeGui.hide()
         self.BoxClass.hide()
+        self.BoxClass.addItem(‘ninja’)
         self.connectButton.clicked.connect(self.getPseudo)
         self.Spellbuttons = []
         self.ipBOX.returnPressed.connect(self.connectButton.click)
