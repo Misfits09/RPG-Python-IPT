@@ -189,15 +189,15 @@ class classe():
                 commlist += b
             except : pass
         if dtype == 'physique':    
-            self.hp -= amount*(1 - self.armor)
+            amount = amount*(1 - self.armor)
         elif dtype == 'magique' :
-            self.hp -= amount*(1 - self.resistance)
-        else :
-            self.hp -= amount
+            amount = amount*(1 - self.resistance)
+        self.hp -= amount
+        commlist += [('mess',self.player.name+' subit '+str(amount)+' degats')]
         if self.hp <= 0 :
             self.hp = 0
-            return [self.player.F.isDead(self.player)]
-        return commlist + [('mess',self.player.name+' a maintenant '+str(self.hp)+' PV')]
+            commlist += [self.player.F.isDead(self.player)]
+        return commlist
     
     #dégâts d'épine
     def spikes(self,source,target,amount,dtype):
@@ -245,8 +245,8 @@ class guerrier(classe):
         if dtype == 'physique':
             return amount/2,[('mess',self.player.name+' bloque l\'attaque')]
     def removeblocking(self,holder):
-        holder.trigger.remDmg(self.blocking)
-        holder.trigger.remTrRes(self.removeblocking)
+        self.trigger.remDmg(self.blocking)
+        self.trigger.remTrRes(self.removeblocking)
         return [('mess',self.player.name + ' ne bloque plus les coups')]
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
@@ -320,14 +320,14 @@ class ninja(classe):
     def hiding(self,source,target,amount,dtype):
         return True,[('mess',self.player.name + ' est trop bien caché et l\'attaque part dans le vent...')]
     def canHide(self,holder):
-        holder.lastTurnHide = False
-        holder.trigger.remTrRes(self.canHide)
+        self.lastTurnHide = False
+        self.trigger.remTrRes(self.canHide)
         return []
     def endHiding(self,holder):
-        holder.lastTurnHide = True
-        holder.trigger.remTrRes(self.endHiding)
-        holder.trigger.remT(self.hiding)
-        return [('mess', holder.player.name + ' est sorti de sa cachette')]
+        self.lastTurnHide = True
+        self.trigger.remTrRes(self.endHiding)
+        self.trigger.remT(self.hiding)
+        return [('mess', self.player.name + ' est sorti de sa cachette')]
 
 
     def attack(self):
@@ -507,11 +507,11 @@ class barbare(classe):
         self.trigger.addTrRes(1,self.remboost)
         return [('mess',self.player.name+' prend une posture offensive mais risquée')]
     def remboost(self,holder):
-        holder.ad = holder.basead
-        holder.armor = holder.basearmor
-        holder.resistance = holder.baseresistance
-        holder.trigger.addDmg(holder.spikes)
-        return [('mess',holder.player.name+' est de nouveau sur la défensive')]
+        self.ad = self.basead
+        self.armor = self.basearmor
+        self.resistance = self.baseresistance
+        self.trigger.addDmg(self.spikes)
+        return [('mess',self.player.name+' est de nouveau sur la défensive')]
 
     #passif: augmenter l'ad et le crit si frappé
     def berzerk(self,source,target,amount,dtype):
@@ -614,7 +614,7 @@ class lancier(classe):
 
     #saut
     def jump(self):
-        try : jumptarget = findtarget(self.player)
+        try : self.jumptarget = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
         if self.stamina < 40:
             return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
@@ -626,13 +626,13 @@ class lancier(classe):
     def jumping(self,source,target,amount,dtype):
         return True,[('mess',self.player.name + ' est en l\'air et évite l\'attaque')]
     def land(self,holder):
-        holder.trigger.remT(self.jumping)
-        holder.trigger.remTrRes(self.land)
-        holder.lastTurnJump = True
-        return [('mess',holder.player.name+' atterrit sur '+holder.jumptarget.player.name)]+holder.attack_target(holder.jumptarget,self.ad*2,'physique')
+        self.trigger.remTrRes(self.land)
+        self.trigger.remT(self.jumping)
+        self.lastTurnJump = True
+        return [('mess',self.player.name+' atterrit sur '+self.jumptarget.player.name)]+self.attack_target(self.jumptarget,self.ad*2,'physique')
     def canjump(self,holder):
-        holder.lastTurnJump = False
-        holder.trigger.remTrRes(self.land)
+        self.lastTurnJump = False
+        self.trigger.remTrRes(self.canjump)
         return []
     
     def spell(self,nomduspell,fld):
