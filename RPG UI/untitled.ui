@@ -401,32 +401,8 @@ p, li { white-space: pre-wrap; }
      <property name="styleSheet">
       <string notr="true">background: purple; color: yellow;</string>
      </property>
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
      <property name="duplicatesEnabled">
       <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>Mage Blanc</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Guerrier</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Lancier</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Barbare</string>
-      </property>
-     </item>
     </widget>
    </widget>
    <widget class="QFrame" name="gameFrame">

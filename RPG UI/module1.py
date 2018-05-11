@@ -20,13 +20,14 @@ class com(QtCore.QThread):
             print('J\'ai essayé d\'émettre : '+str(a))
             self.commTrigger.emit(a)
 class MainWindow(Ui_RPG):
-    valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier']
+    valideClasses = ['Guerrier','Ninja','Mage Blanc','Barbare','Lancier']
     def __init__(self, frame,getM,sendM):
         self.setupUi(frame)
         self.gameFrame.hide()
         self.playeGui.hide()
         self.BoxClass.hide()
-        self.BoxClass.addItem('ninja')
+        for cl in self.valideClasses:
+            self.BoxClass.addItem(cl)
         self.connectButton.clicked.connect(self.getPseudo)
         self.Spellbuttons = []
         self.ipBOX.returnPressed.connect(self.connectButton.click)

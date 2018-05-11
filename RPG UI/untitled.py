@@ -143,10 +143,6 @@ class Ui_RPG(object):
         self.BoxClass.setStyleSheet("background: purple; color: yellow;")
         self.BoxClass.setDuplicatesEnabled(False)
         self.BoxClass.setObjectName("BoxClass")
-        self.BoxClass.addItem("")
-        self.BoxClass.addItem("")
-        self.BoxClass.addItem("")
-        self.BoxClass.addItem("")
         self.gameFrame = QtWidgets.QFrame(self.centralwidget)
         self.gameFrame.setEnabled(True)
         self.gameFrame.setGeometry(QtCore.QRect(0, 60, 601, 281))
@@ -183,7 +179,6 @@ class Ui_RPG(object):
         RPG.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(RPG)
-        self.BoxClass.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(RPG)
 
     def retranslateUi(self, RPG):
@@ -207,10 +202,6 @@ class Ui_RPG(object):
         self.comboBox.setItemText(0, _translate("RPG", "4291"))
         self.comboBox.setItemText(1, _translate("RPG", "5536"))
         self.comboBox.setItemText(2, _translate("RPG", "7289"))
-        self.BoxClass.setItemText(0, _translate("RPG", "Mage Blanc"))
-        self.BoxClass.setItemText(1, _translate("RPG", "Guerrier"))
-        self.BoxClass.setItemText(2, _translate("RPG", "Lancier"))
-        self.BoxClass.setItemText(3, _translate("RPG", "Barbare"))
         self.helpSpell.setText(_translate("RPG", "?"))
         self.gameText.setText(_translate("RPG", "<html><head/><body><p><span style=\" font-size:10pt; font-weight:600;\">Démarrage de la partie...</span></p></body></html>"))
         self.fieldBOX.setHtml(_translate("RPG", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
