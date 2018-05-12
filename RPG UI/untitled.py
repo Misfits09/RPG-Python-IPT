@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_RPG(object):
     def setupUi(self, RPG):
         RPG.setObjectName("RPG")
-        RPG.resize(603, 466)
+        RPG.setFixedSize(603, 466)
         font = QtGui.QFont()
         font.setFamily("OpenSymbol")
         RPG.setFont(font)
