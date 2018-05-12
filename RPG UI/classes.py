@@ -4,6 +4,8 @@ import socket
 import time
 class Empty_fld(Exception):
     pass
+class Spellcancel(Exception):
+    pass
 class joueur():
     alive = True
     F = None
@@ -79,6 +81,8 @@ def findtarget(j,alive = True):
     while 1:
         sendc(['get_c','target',namelist ],j)
         useless,name = get_rspc(j)
+        if name == 'cancel':
+            raise Spellcancel
         plFound = False
         for pl in F.player:
             if(pl.name.casefold().strip() == name.casefold().strip() and (pl.alive == alive)):
@@ -253,6 +257,7 @@ class guerrier(classe):
     def protect (self):
         try : pl = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if self.stamina < 40 :
             return [('mess', self.player.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         self.stamina -= 40
@@ -273,6 +278,7 @@ class guerrier(classe):
     def attack(self):
         try : target = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -333,6 +339,7 @@ class ninja(classe):
     def attack(self):
         try : target = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -402,6 +409,7 @@ class mage_blanc(classe):
         else:
             try : tg = findtarget(self.player)
             except Empty_fld : return [('mess','Aucune cible disponible')]
+            except Spellcancel : return []
             self.stamina -= 30
             tg.hp += 25
             if tg.hp > tg.pvMAX:
@@ -412,6 +420,7 @@ class mage_blanc(classe):
     def attack(self):
         try : target = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -423,6 +432,7 @@ class mage_blanc(classe):
     def godshield(self):
         try : tg = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
         elif self.hasDoneGS:
@@ -444,6 +454,7 @@ class mage_blanc(classe):
     def reborn(self):
         try : pl = findtarget(self.player,False)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if self.stamina <  100:
             return [('mess',self.player.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         self.stamina -= 100
@@ -523,6 +534,7 @@ class barbare(classe):
     def attack(self):
         try : target = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -606,6 +618,7 @@ class lancier(classe):
     def attack(self):
         try : target = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -616,6 +629,7 @@ class lancier(classe):
     def jump(self):
         try : self.jumptarget = findtarget(self.player)
         except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         if self.stamina < 40:
             return [('mess', self.player.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         self.stamina = 0

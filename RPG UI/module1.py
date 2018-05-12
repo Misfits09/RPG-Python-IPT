@@ -96,6 +96,8 @@ class MainWindow(Ui_RPG):
         item, ok = QtWidgets.QInputDialog.getItem(RPG, "Choisissez un Cible", "Joueurs", liste, 0, False)
         if ok and item:
             return item
+        elif not(ok):
+            return 'cancel'
         else:
             return self.pick(liste)
     def infiniteloop(self,a):
