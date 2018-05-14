@@ -6,7 +6,8 @@ import pickle
 from builtins import *
 import random
 from classes import *
-from threading import Thread,Barrier
+from threading import Thread,Barrier,Lock
+import sys
 #DÃ©finition des fonctions
 def TF(message):
     while 1:
@@ -28,8 +29,34 @@ def getInt(message):
         except:
             print("Mauvaise entrée : Veuillez rentrer un entier >= 2 \n ")
 
-
 #Initialisation de la partie
+def get_infos(i,s,b,l):
+    (sock,address) = s.accept()
+    j = joueur(i+1,sock)
+    print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
+    mss = pickle.loads(j.socket.recv(1024))
+    try :
+        if mss[0] == "name":
+            j.name = mss[1]
+            print('Joueur '+str(j.id)+' s\'appelle '+mss[1]+'\n')
+    except:
+        j.name = 'SansNom'+str(j.id)
+    j.socket.send(pickle.dumps(["get_classe",True]))
+    mss = pickle.loads(j.socket.recv(1024)) # de type ['classe', nomdelaclasse]
+    try :
+        if (mss[0] == "classe"):
+            print('Classe recue : \'',mss[1],'\' par joueur '+str(j.id))
+            j.set_classe(mss[1].strip().casefold())
+        else:
+            j.set_classe('guerrier')
+            print('Joueur '+str(j.id)+' guerrier par defaut')
+    except:
+        j.set_classe('guerrier')
+        print('Joueur '+str(j.id)+' guerrier par defaut')
+    l.acquire()
+    p.append(j)
+    l.release()
+    b.wait()
 
 version = 'BETA 3.0'
 port = 4291
@@ -47,15 +74,18 @@ if(TF("Voulez vous lancer une partie ?")):
     s.bind(('',port))
     s.listen()
     p = []
-    for i in range(nbj):
-        print("     Attente joueur "+str(i+1))
-        (sock,address) = s.accept()
-        p.append(joueur(i+1,sock))
-        print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
+    b = Barrier(nbj+1)
+    l = Lock()
+    th = [Thread(target=get_infos,args=(i,s,b,l)) for i in range(nbj)]
+    for t in th:
+        t.start()
+    b.wait()
+    print('usernames et classes recuperes')
     F = field(p)
 else:
     print("Ah bah... Au revoir ?")
     input('?')
+    sys.exit(0)
 
 #Définition de la fonction récupérant la vérification qu'une update est généralisée
 def isOk(cd):
@@ -70,36 +100,6 @@ def isOk(cd):
     return True
 
 
-# Récupération des usernames
-def get_infos(j,b):
-    mss = pickle.loads(j.socket.recv(1024))
-    try :
-        if mss[0] == "name":
-            j.name = mss[1]
-            print('Joueur '+str(j.id)+' s\'appelle '+mss[1]+'\n')
-    except:
-        j.name = 'SansNom'+str(j.id)
-    j.socket.send(pickle.dumps(["get_classe",True]))
-    mss = pickle.loads(j.socket.recv(1024)) # de type ['classe', nomdelaclasse]
-    try :
-        if (mss[0] == "classe"):
-            print('Classe recue : \'',mss[1],'\' par joueur '+str(j.id))
-            j.set_classe(mss[1].strip().casefold())
-        else:
-            j.set_classe('guerrier')
-    except:
-        j.set_classe('guerrier')
-    i = b.wait()
-    if i == 0:
-        print('usernames et classes recuperes')
-
-b = Barrier(len(p)+1)
-th = [Thread(target=get_infos,args=(j,b)) for j in p]
-for t in th:
-    t.start()
-i = b.wait()
-if i == 0:
-        print('usernames et classes recuperes')
 # Définition des fonctions de communication
 def send(mss, lp = p):
     print(str(mss))
@@ -238,13 +238,11 @@ while 1:
         else: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
     if( F.nb == 1):
-        import sys
         send(['mess',str(F)])
         send(['end_game','Fin de la partie, le gagnant est : '+[pl for pl in p if pl.alive == True][0].name])
         input('Fin de partie')
         sys.exit(0)
     elif( F.nb == 0):
-        import sys
         send(['mess',str(F)])
         send(['end_game','Fin de la partie, le combat a été rude... Personne ne gagne ! '])
         input('Fin de partie')
