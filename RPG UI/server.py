@@ -32,7 +32,7 @@ def getInt(message):
 #Initialisation de la partie
 def get_infos(i,s,b,l):
     (sock,address) = s.accept()
-    print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
+    print("     Joueur "+str(i)+" arrivé et enregistré !! \n")
     mss = pickle.loads(sock.recv(1024))
     try :
         if mss[0] == "name":
@@ -81,7 +81,7 @@ if(TF("Voulez vous lancer une partie ?")):
     p = []
     b = Barrier(nbj+1)
     l = Lock()
-    th = [Thread(target=get_infos,args=(i,s,b,l)) for i in range(nbj)]
+    th = [Thread(target=get_infos,args=(i+1,s,b,l)) for i in range(nbj)]
     for t in th:
         t.start()
     b.wait()

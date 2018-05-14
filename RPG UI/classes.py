@@ -373,7 +373,7 @@ class mage_blanc(joueur):
     speed = 115
     help = [('soin',30,'Soigne la cible de 25 PV'),
             ('reborn',100,'Fait renaitre un joueur mort avec la moitié de sa vie'),
-            ('godshield',100,'Bouclier invulnérable d\'un tour sur une cible (Une seule utilisation)'),
+            ('godshield',100,'Bouclier invulnérable d\'un tour sur une cible (Un tour de delai)'),
             ('attack',25,'Lance une faible attaque magique sur la cible')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
