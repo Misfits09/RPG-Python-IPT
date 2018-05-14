@@ -7,8 +7,6 @@ class Empty_fld(Exception):
 class Spellcancel(Exception):
     pass
 class joueur():
-    alive = True
-    F = None
     def __init__(self,i,sk): 
         self.id,self.name = i,str(i)
         self.alive = True
