@@ -10,7 +10,7 @@ from threading import Thread,Barrier,Lock
 import sys
 #DÃ©finition des fonctions
 def TF(message):
-    while 1:
+    while True:
         try:
             a = bool(int(input(message+" 1 / 0 :")))
             return a
@@ -19,7 +19,7 @@ def TF(message):
 def idle(action):
     input("Appuyez sur entrer pour "+action)
 def getInt(message):
-    while 1:
+    while True:
         try:
             a = int(input(message+" :"))
             if (a < 1) : 
@@ -32,27 +32,32 @@ def getInt(message):
 #Initialisation de la partie
 def get_infos(i,s,b,l):
     (sock,address) = s.accept()
-    j = joueur(i+1,sock)
     print("     Joueur "+str(i+1)+" arrivé et enregistré !! \n")
-    mss = pickle.loads(j.socket.recv(1024))
+    mss = pickle.loads(sock.recv(1024))
     try :
         if mss[0] == "name":
-            j.name = mss[1]
-            print('Joueur '+str(j.id)+' s\'appelle '+mss[1]+'\n')
+            name = mss[1]
+            print('Joueur '+str(i)+' s\'appelle '+mss[1]+'\n')
     except:
-        j.name = 'SansNom'+str(j.id)
-    j.socket.send(pickle.dumps(["get_classe",True]))
-    mss = pickle.loads(j.socket.recv(1024)) # de type ['classe', nomdelaclasse]
+        name = 'SansNom'+str(i)
+    sock.send(pickle.dumps(["get_classe",True]))
+    mss = pickle.loads(sock.recv(1024)) # de type ['classe', nomdelaclasse]
     try :
         if (mss[0] == "classe"):
-            print('Classe recue : \'',mss[1],'\' par joueur '+str(j.id))
-            j.set_classe(mss[1].strip().casefold())
+            print('Classe recue : \'',mss[1],'\' par joueur '+str(i))
+            for cl in classes:
+                if mss[1] == cl.classname:
+                    j = cl(i,sock)
+                    j.name = name
+                    break
         else:
-            j.set_classe('guerrier')
-            print('Joueur '+str(j.id)+' guerrier par defaut')
+            j = guerrier(i,sock)
+            j.name = name
+            print('Joueur '+str(i)+' guerrier par defaut')
     except:
-        j.set_classe('guerrier')
-        print('Joueur '+str(j.id)+' guerrier par defaut')
+        j = guerrier(i,sock)
+            j.name = name
+        print('Joueur '+str(i)+' guerrier par defaut')
     l.acquire()
     p.append(j)
     l.release()
@@ -125,7 +130,7 @@ send(['field',F.getTable()])
 time.sleep(.5)
 
 for j in p:
-    send(['you', j.classe.pvMAX, j.classe.help],[j])
+    send(['you', j.pvMAX, j.help],[j])
 
 ###### PARTIE #######
 
@@ -138,13 +143,13 @@ def command(a,j): #gestion des commandes pendant un tour
         return True
     a = a.strip().casefold()
     al = a.split()
-    if True:
+    try:
         if(al[0] == 'fin'):
             print('\n    -Fin de votre tour-   \n \n')
             send(['mess',j.name+' a fini de se battre'])
             return False
         elif(al[0] == 'spell'):
-            try: toshow = j.classe.spell(al[1],F)
+            try: toshow = j.spell(al[1],F)
             except: return wrong_c(j)
             for typeR,obj in toshow:
                 if typeR == 'death':
@@ -163,14 +168,13 @@ def command(a,j): #gestion des commandes pendant un tour
             return j.alive
 
         elif(al[0] == 'stats'): # A REVOIR #
-            you = j.classe
             statStr = ''
             statStr +='     -> Voici vos informations : \n'
-            statStr +='         - PV : '+str(you.hp) + '\n'
-            statStr +='         - Stamina : '+str(you.stamina) + '\n'
-            statStr +='         - Dégâts : '+str(you.ad)+' et une attaque coûte '+str(you.att_cost)+' d\'endurance' + '\n'
-            statStr +='         - Armure : '+str(you.armor*100)+'% des dégâts physiques absorbés' + '\n'
-            statStr +='         - Résistance : '+str(you.resistance*100)+'% des dégâts magiques absorbés' + '\n'
+            statStr +='         - PV : '+str(j.hp) + '\n'
+            statStr +='         - Stamina : '+str(j.stamina) + '\n'
+            statStr +='         - Dégâts : '+str(j.ad)+' et une attaque coûte '+str(j.att_cost)+' d\'endurance' + '\n'
+            statStr +='         - Armure : '+str(j.armor*100)+'% des dégâts physiques absorbés' + '\n'
+            statStr +='         - Résistance : '+str(j.resistance*100)+'% des dégâts magiques absorbés' + '\n'
             send(['mess',statStr],[j])
             return True
         elif(al[0] == 'forceend'):
@@ -185,7 +189,7 @@ def command(a,j): #gestion des commandes pendant un tour
             return True
         else:
             return wrong_c(j)
-    else:
+    except:
         return wrong_c(j)
     
 def rStartTour(name): #Phrases aléatoires de début de tour
@@ -195,12 +199,13 @@ def rStartTour(name): #Phrases aléatoires de début de tour
 send(['mess','\n \n \n          ---------------- \n     DEBUT DE LA PARTIE \n            ----------------\n \n'])
 strFld = 'Voici l\'état du terrain en ce début de partie : '+j.name+' : ' + str(F) + '\n \n \n'
 send(['mess',strFld])
-for k in F.player:
-    send(['setParam',[('hp',k.classe.hp),('stamina',k.classe.stamina)]],[k])
-while 1:
+def send_param():    
+    for k in F.player:
+        send(['setParam',[('hp',k.hp),('stamina',k.stamina)]],[k])
+while True:
     i = 1
     for j in p:
-        if True:
+        try:
             if(j.alive):
                 other_pl = [y for y in p if y != j]
                 j.restore_stamina()
@@ -209,11 +214,11 @@ while 1:
                 strt_mss = rStartTour(j.name)
                 print(strt_mss)
                 send(['mess',strt_mss])
-                for typeR,obj in j.classe.new_turn():
+                for typeR,obj in j.new_turn():
                     if typeR == 'death':
                         if(obj == j): #Si le joueur meurt de lui même
-                            send(['mess','Vous êtes mort en attaquant'],[j])
-                            send(['mess', j.name+' est mort au combat'],other_pl)
+                            send(['mess','Vous êtes mort au debut de votre tour'],[j])
+                            send(['mess', j.name+' est mort en commencant son tour'],other_pl)
                             j.alive = False #Juste pour être sûre xD
                             break
                         else:
@@ -222,20 +227,19 @@ while 1:
                     elif typeR == 'mess':
                         send(['mess',obj])
                 cd = True
-                send(['setParam',[('hp',j.classe.hp),('stamina',j.classe.stamina)]],[j])    
+                send_param()
                 while cd:
                     send(['get_c','main'],[j])
                     ms = get_rsp(j)
                     if ms[0] == 'cmd':
                         print(str(ms[1]))
                         cd = command(ms[1],j)
-                    for k in F.player:
-                        send(['setParam',[('hp',k.classe.hp),('stamina',k.classe.stamina)]],[k])
+                    send_param()
                     send(['field',F.getTable()])
                 send(['endT',F.getTable])
                 strFld = '\n \n Voici l\'état du terrain à la fin du Tour de '+j.name+' : ' + str(F)
                 send(['mess',strFld])
-        else: pass
+        except: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
     if( F.nb == 1):
         send(['mess',str(F)])

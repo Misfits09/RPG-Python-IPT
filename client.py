@@ -55,7 +55,7 @@ else:
 #Envoi pseudo 
 print('En attente des autres joueurs ...')
 if(get_updt() == ["get_name", True]):
-    while 1:
+    while True:
         try :
             usrnm = str(input('\n Choissisez un pseudo : '))
             jName = usrnm
@@ -70,7 +70,7 @@ if(get_updt() == ["get_classe", True]):
     print('Choissisez parmis les classes suivantes : ')
     for k in [j.name for j in classes]:
         print(' -> '+k)
-    while 1:
+    while True:
         try :
             maclasse = str(input('Votre classe : '))
             if maclasse in [j.name for j in classes]:
@@ -82,7 +82,7 @@ if(get_updt() == ["get_classe", True]):
             send_error(2)
 print('En attente des autres joueurs ...')
 
-while 1:
+while True:
     up = get_updt()
     t = up[0]
     if t == "mess":

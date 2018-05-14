@@ -63,7 +63,7 @@ def get_rspc(j):
 # DEFINITION DES CLASSES #
 def findtarget(j):
     global F
-    while 1:
+    while True:
         sendc(['get_c','nom de la cible : '],j)
         useless,name = get_rspc(j)
         plFound = False
@@ -429,7 +429,7 @@ class mage_blanc(classe):
         global F
         for p in F.player:
             if(p.alive == False):
-                while 1:
+                while True:
                     sendc(['get_c','nom de la cible : '],self.player)
                     useless,name = get_rspc(self.player)
                     plFound = False

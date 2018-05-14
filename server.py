@@ -8,7 +8,7 @@ import random
 from classes import *
 #DÃ©finition des fonctions
 def TF(message):
-    while 1:
+    while True:
         try:
             a = bool(int(input(message+" 1 / 0 :")))
             return a
@@ -17,7 +17,7 @@ def TF(message):
 def idle(action):
     input("Appuyez sur entrer pour "+action)
 def getInt(message):
-    while 1:
+    while True:
         try:
             a = int(input(message+" :"))
             if (a < 1) : 
@@ -125,7 +125,7 @@ def command(a,j): #gestion des commandes pendant un tour
         return True
     a = a.strip().casefold()
     al = a.split()
-    if True:
+    try:
         if(al[0] == 'help'): #Commande d'aide
             send(['mess','\n       Voici la liste des commandes :'],[j])
             
@@ -196,7 +196,7 @@ def command(a,j): #gestion des commandes pendant un tour
             return True
         else:
             return wrong_c(j)
-    else:
+    except:
         return wrong_c(j)
     
 def rStartTour(name): #Phrases aléatoires de début de tour
@@ -207,10 +207,10 @@ def rStartTour(name): #Phrases aléatoires de début de tour
 send(['mess','\n \n \n          ---------------- \n     DEBUT DE LA PARTIE \n            ----------------\n \n'])
 strFld = 'Voici l\'état du terrain en ce début de partie : '+j.name+' : ' + str(F) + '\n \n \n'
 send(['mess',strFld])
-while 1:
+while True:
     i = 1
     for j in p:
-        if True:
+        try:
             if(j.alive):
                 other_pl = [y for y in p if y != j]
                 j.restore_stamina()
@@ -239,7 +239,7 @@ while 1:
                         cd = command(ms[1],j)
                 strFld = '\n \n Voici l\'état du terrain à la fin du Tour de '+j.name+' : ' + str(F)
                 send(['mess',strFld])
-        else: pass
+        except: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
     if( F.nb == 1):
         import sys
