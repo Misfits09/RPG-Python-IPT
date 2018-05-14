@@ -56,7 +56,7 @@ def get_infos(i,s,b,l):
             print('Joueur '+str(i)+' guerrier par defaut')
     except:
         j = guerrier(i,sock)
-            j.name = name
+        j.name = name
         print('Joueur '+str(i)+' guerrier par defaut')
     l.acquire()
     p.append(j)
