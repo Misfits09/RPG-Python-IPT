@@ -21,7 +21,7 @@ class com(QtCore.QThread):
             self.commTrigger.emit(a)
 class MainWindow(Ui_RPG):
     valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier']
-    def __init__(self, frame,getM,sendM):
+    def __init__(self, frame):
         self.setupUi(frame)
         self.gameFrame.hide()
         self.playeGui.hide()
@@ -259,7 +259,7 @@ def boot():
     global app,RPG,ui
     app = QtWidgets.QApplication(sys.argv)
     RPG = QtWidgets.QMainWindow()
-    ui = MainWindow(RPG,lambda: 'a', lambda x : print(x))
+    ui = MainWindow(RPG)
     RPG.show()
     sys.exit(app.exec_())
 
