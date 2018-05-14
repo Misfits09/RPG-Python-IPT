@@ -48,10 +48,8 @@ class MainWindow(Ui_RPG):
         self.send_updt(['cmd','fin'])
     def LaunchSpell(self):
         spellname = RPG.sender().text()
-        isIN = False
         for i in range(len(self.mySpell)):
             if self.mySpell[i][0] == spellname:
-                isIN = True
                 break
         if self.stamina.value() < self.mySpell[i][1]:
             return self.failwith('Pas assez d\'endurance')
