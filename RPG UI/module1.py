@@ -238,7 +238,7 @@ class MainWindow(Ui_RPG):
         self.socket.send(pickle.dumps(u))
         time.sleep(.5)
     def send_error(self,ider):
-        send_updt(["error",ider])
+        self.send_updt(["error",ider])
 
     #Changement des valeurs
     def setParam(self,k):
