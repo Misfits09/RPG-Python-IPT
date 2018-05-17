@@ -85,6 +85,7 @@ if(TF("Voulez vous lancer une partie ?")):
     for t in th:
         t.start()
     b.wait()
+    s.close()
     print('usernames et classes recuperes')
     F = field(p)
 else:
