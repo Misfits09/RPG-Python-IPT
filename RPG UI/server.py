@@ -197,9 +197,7 @@ def rStartTour(name): #Phrases aléatoires de début de tour
     l1 = ["*namej* est prêt à se battre !","Craignez la puissance *namej* :o","Cachez vous ! *namej* est prêt à jouer","*namej* va jouer mais personne n'a peur de lui ;-( ","*namej* commence son tour !","*namej* semble inarretable préparez vous à son tour"] 
     rint = random.randint(0,len(l1)-1)
     return l1[rint].replace('*namej*',name)
-send(['mess','\n \n \n          ---------------- \n     DEBUT DE LA PARTIE \n            ----------------\n \n'])
-strFld = 'Voici l\'état du terrain en ce début de partie : '+j.name+' : ' + str(F) + '\n \n \n'
-send(['mess',strFld])
+send(['mess','\n \n \n      ---------------- \n      DEBUT DE LA PARTIE \n      ----------------\n'])
 def send_param():    
     for k in F.player:
         send(['setParam',[('hp',k.hp),('stamina',k.stamina)]],[k])
@@ -237,9 +235,7 @@ while True:
                         cd = command(ms[1],j)
                     send_param()
                     send(['field',F.getTable()])
-                send(['endT',F.getTable])
-                strFld = '\n \n Voici l\'état du terrain à la fin du Tour de '+j.name+' : ' + str(F)
-                send(['mess',strFld])
+                send(['field',F.getTable])
         except: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
     if( F.nb == 1):
