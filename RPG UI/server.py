@@ -90,8 +90,8 @@ if(TF("Voulez vous lancer une partie ?")):
         s.listen()
         while connections < nbj :
             message, address = s2.recvfrom(1024)
-            th = Thread(target=connect_ssip,args=(address,connections))
             connections += 1
+            th = Thread(target=connect_ssip,args=(address,connections))
             th.start()
     else:
         s.bind(('',port))
@@ -148,6 +148,8 @@ time.sleep(.5)
 
 for j in p:
     send(['you', j.pvMAX, j.help],[j])
+for j in p:
+    send(['setParam',[('id',j.id)]],[j])
 
 ###### PARTIE #######
 
