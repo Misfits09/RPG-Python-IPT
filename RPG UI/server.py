@@ -30,7 +30,10 @@ def getInt(message):
             print("Mauvaise entrée : Veuillez rentrer un entier >= 2 \n ")
 
 #Initialisation de la partie
-def get_infos(i,s,b,l):
+def connect_ssip(adress,i):
+    s2.sendto(pickle.dumps("Hi there"), address)
+    get_infos(i)
+def get_infos(i):
     (sock,address) = s.accept()
     print("     Joueur "+str(i)+" arrivé et enregistré !! \n")
     mss = pickle.loads(sock.recv(1024))
@@ -73,18 +76,31 @@ print('Vos informations \n     IP = '+localIP+' \n     Port = '+str(port)+' \n \
 if(TF("Voulez vous lancer une partie ?")):
     
     nbj = getInt("Nombre de joueurs")
-    idle("rechercher des joueurs : ")
-    s = socket.socket()
-    #s.bind((socket.gethostname(),port))
-    s.bind(('',port))
-    s.listen()
-    p = []
-    b = Barrier(nbj+1)
     l = Lock()
-    th = [Thread(target=get_infos,args=(i+1,s,b,l)) for i in range(nbj)]
-    for t in th:
-        t.start()
+    b = Barrier(nbj+1)
+    p = []
+    s = socket.socket()
+    connections = 0
+    if TF('sans ip?'):
+        s2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s2.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s2.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        s2.bind(('', port))
+        s.bind(('',4392))
+        s.listen()
+        while connections < nbj :
+            message, address = s2.recvfrom(1024)
+            th = Thread(target=connect_ssip,args=(address,connections))
+            connections += 1
+            th.start()
+    else:
+        s.bind(('',port))
+        s.listen()
+        th = [Thread(target=get_infos,args=(i)) for i in range(nbj)]
+        for t in th:
+            t.start()
     b.wait()
+    s2.close()
     s.close()
     print('usernames et classes recuperes')
     F = field(p)

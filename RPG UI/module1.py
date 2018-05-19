@@ -205,14 +205,23 @@ class MainWindow(Ui_RPG):
 
     #Connection Et Recup pseudo
     def getPseudo(self):
-        if self.ipBOX.text() == '':
-            return self.failwith('IP Invalide')
         try:
             self.connectButton.setEnabled(False)
             self.connectButton.setStyleSheet('background: grey')
             app.processEvents()
+            if self.ipBOX.text() == '':
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)                
+                s.sendto(pickle.dumps("Anyone?"), ('<broadcast>', int(self.comboBox.currentText())))
+                recv_data, addr = s.recvfrom(1024)
+                ip = addr[0]
+                port = 4392
+                time.sleep(.3)
+            else:
+                ip = self.ipBOX.text()
+                port = int(self.comboBox.currentText())
             s = socket.socket()
-            s.connect((self.ipBOX.text(),int(self.comboBox.currentText())))
+            s.connect((ip,port))
             self.socket = s
             self.macom = com(self.get_updt)
         except:
