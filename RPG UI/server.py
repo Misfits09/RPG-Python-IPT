@@ -235,7 +235,7 @@ while True:
                         cd = command(ms[1],j)
                     send_param()
                     send(['field',F.getTable()])
-                send(['field',F.getTable])
+                send(['field',F.getTable()])
         except: pass
     send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
     if( F.nb == 1):

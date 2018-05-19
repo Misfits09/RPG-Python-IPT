@@ -23,7 +23,7 @@ class Ui_RPG(object):
         self.centralwidget.setStyleSheet("background:url(./tel.png)")
         self.centralwidget.setObjectName("centralwidget")
         self.Titre = QtWidgets.QLabel(self.centralwidget)
-        self.Titre.setGeometry(QtCore.QRect(0, 0, 601, 51))
+        self.Titre.setGeometry(QtCore.QRect(0, 0, 641, 51))
         font = QtGui.QFont()
         font.setFamily("MV Boli")
         font.setPointSize(20)
@@ -34,7 +34,7 @@ class Ui_RPG(object):
         self.Titre.setObjectName("Titre")
         self.playeGui = QtWidgets.QFrame(self.centralwidget)
         self.playeGui.setEnabled(True)
-        self.playeGui.setGeometry(QtCore.QRect(0, 350, 601, 121))
+        self.playeGui.setGeometry(QtCore.QRect(10, 350, 621, 121))
         self.playeGui.setStyleSheet("background: rgba(1,1,1,.5)")
         self.playeGui.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.playeGui.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -55,19 +55,20 @@ class Ui_RPG(object):
         self.stamina.setFormat("%p Endurance")
         self.stamina.setObjectName("stamina")
         self.pseudo = QtWidgets.QLabel(self.playeGui)
-        self.pseudo.setGeometry(QtCore.QRect(490, 10, 101, 41))
+        self.pseudo.setGeometry(QtCore.QRect(480, 10, 131, 41))
         self.pseudo.setStyleSheet("background:none")
+        self.pseudo.setAlignment(QtCore.Qt.AlignCenter)
         self.pseudo.setObjectName("pseudo")
         self.labelJoueur = QtWidgets.QLabel(self.playeGui)
-        self.labelJoueur.setGeometry(QtCore.QRect(490, 40, 71, 41))
+        self.labelJoueur.setGeometry(QtCore.QRect(500, 40, 71, 41))
         self.labelJoueur.setStyleSheet("background:none")
         self.labelJoueur.setObjectName("labelJoueur")
         self.pID = QtWidgets.QLabel(self.playeGui)
-        self.pID.setGeometry(QtCore.QRect(560, 40, 61, 41))
+        self.pID.setGeometry(QtCore.QRect(580, 40, 61, 41))
         self.pID.setStyleSheet("background:none")
         self.pID.setObjectName("pID")
         self.gameLog = QtWidgets.QTextBrowser(self.playeGui)
-        self.gameLog.setGeometry(QtCore.QRect(190, 10, 256, 81))
+        self.gameLog.setGeometry(QtCore.QRect(190, 10, 291, 81))
         font = QtGui.QFont()
         font.setFamily("MV Boli")
         font.setPointSize(10)
@@ -75,18 +76,18 @@ class Ui_RPG(object):
         self.gameLog.setStyleSheet("color:white")
         self.gameLog.setObjectName("gameLog")
         self.endTour = QtWidgets.QPushButton(self.playeGui)
-        self.endTour.setGeometry(QtCore.QRect(520, 90, 75, 23))
+        self.endTour.setGeometry(QtCore.QRect(540, 90, 75, 23))
         self.endTour.setStyleSheet("background: red; color:white;")
         self.endTour.setObjectName("endTour")
         self.setupFrame = QtWidgets.QFrame(self.centralwidget)
         self.setupFrame.setEnabled(True)
-        self.setupFrame.setGeometry(QtCore.QRect(10, 60, 571, 261))
+        self.setupFrame.setGeometry(QtCore.QRect(10, 60, 621, 261))
         self.setupFrame.setStyleSheet("background: none;")
         self.setupFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.setupFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.setupFrame.setObjectName("setupFrame")
         self.entete = QtWidgets.QLabel(self.setupFrame)
-        self.entete.setGeometry(QtCore.QRect(150, 0, 279, 51))
+        self.entete.setGeometry(QtCore.QRect(170, 0, 279, 51))
         font = QtGui.QFont()
         font.setFamily("MV Boli")
         font.setPointSize(12)
@@ -96,7 +97,7 @@ class Ui_RPG(object):
         self.entete.setStyleSheet("background:rgba(1,1,1,.8);color:white; margin: 5")
         self.entete.setObjectName("entete")
         self.labelIP = QtWidgets.QLabel(self.setupFrame)
-        self.labelIP.setGeometry(QtCore.QRect(270, 80, 28, 31))
+        self.labelIP.setGeometry(QtCore.QRect(300, 80, 28, 31))
         font = QtGui.QFont()
         font.setPointSize(13)
         font.setBold(True)
@@ -108,11 +109,11 @@ class Ui_RPG(object):
         self.labelIP.setStyleSheet("background: rgba(1,1,1,.7); color:white;")
         self.labelIP.setObjectName("labelIP")
         self.ipBOX = QtWidgets.QLineEdit(self.setupFrame)
-        self.ipBOX.setGeometry(QtCore.QRect(190, 120, 181, 20))
+        self.ipBOX.setGeometry(QtCore.QRect(220, 120, 181, 20))
         self.ipBOX.setStyleSheet("background:white")
         self.ipBOX.setObjectName("ipBOX")
         self.labelPort = QtWidgets.QLabel(self.setupFrame)
-        self.labelPort.setGeometry(QtCore.QRect(260, 150, 49, 31))
+        self.labelPort.setGeometry(QtCore.QRect(290, 150, 49, 31))
         font = QtGui.QFont()
         font.setPointSize(13)
         font.setBold(True)
@@ -124,7 +125,7 @@ class Ui_RPG(object):
         self.labelPort.setStyleSheet("background: rgba(1,1,1,.7); color:white;")
         self.labelPort.setObjectName("labelPort")
         self.connectButton = QtWidgets.QPushButton(self.setupFrame)
-        self.connectButton.setGeometry(QtCore.QRect(224, 230, 101, 31))
+        self.connectButton.setGeometry(QtCore.QRect(260, 230, 101, 31))
         font = QtGui.QFont()
         font.setBold(True)
         font.setUnderline(True)
@@ -133,7 +134,7 @@ class Ui_RPG(object):
         self.connectButton.setStyleSheet("background:white; color:green")
         self.connectButton.setObjectName("connectButton")
         self.comboBox = QtWidgets.QComboBox(self.setupFrame)
-        self.comboBox.setGeometry(QtCore.QRect(240, 190, 81, 22))
+        self.comboBox.setGeometry(QtCore.QRect(270, 190, 81, 22))
         self.comboBox.setEditable(False)
         self.comboBox.setIconSize(QtCore.QSize(5, 5))
         self.comboBox.setObjectName("comboBox")
@@ -141,25 +142,25 @@ class Ui_RPG(object):
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.BoxClass = QtWidgets.QComboBox(self.setupFrame)
-        self.BoxClass.setGeometry(QtCore.QRect(170, 120, 231, 22))
+        self.BoxClass.setGeometry(QtCore.QRect(200, 120, 231, 22))
         self.BoxClass.setStyleSheet("background: purple; color: yellow;")
         self.BoxClass.setDuplicatesEnabled(False)
         self.BoxClass.setObjectName("BoxClass")
         self.gameFrame = QtWidgets.QFrame(self.centralwidget)
         self.gameFrame.setEnabled(True)
-        self.gameFrame.setGeometry(QtCore.QRect(0, 60, 601, 281))
+        self.gameFrame.setGeometry(QtCore.QRect(10, 60, 621, 281))
         self.gameFrame.setAutoFillBackground(False)
         self.gameFrame.setStyleSheet("background: rgba(0,0,0,.5);color: white")
         self.gameFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.gameFrame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.gameFrame.setObjectName("gameFrame")
         self.spells = QtWidgets.QFrame(self.gameFrame)
-        self.spells.setGeometry(QtCore.QRect(429, 10, 151, 261))
+        self.spells.setGeometry(QtCore.QRect(440, 10, 171, 261))
         self.spells.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.spells.setFrameShadow(QtWidgets.QFrame.Raised)
         self.spells.setObjectName("spells")
         self.helpSpell = QtWidgets.QPushButton(self.gameFrame)
-        self.helpSpell.setGeometry(QtCore.QRect(410, 250, 21, 21))
+        self.helpSpell.setGeometry(QtCore.QRect(420, 250, 21, 21))
         self.helpSpell.setStyleSheet("background: green; color:white")
         self.helpSpell.setObjectName("helpSpell")
         self.gameText = QtWidgets.QLabel(self.gameFrame)
@@ -172,10 +173,10 @@ class Ui_RPG(object):
         self.GamePicture.setFrameShadow(QtWidgets.QFrame.Raised)
         self.GamePicture.setObjectName("GamePicture")
         self.fieldBOX = QtWidgets.QTextBrowser(self.gameFrame)
-        self.fieldBOX.setGeometry(QtCore.QRect(250, 50, 141, 201))
+        self.fieldBOX.setGeometry(QtCore.QRect(250, 50, 171, 191))
         self.fieldBOX.setObjectName("fieldBOX")
         self.label = QtWidgets.QLabel(self.gameFrame)
-        self.label.setGeometry(QtCore.QRect(286, 23, 71, 20))
+        self.label.setGeometry(QtCore.QRect(300, 23, 71, 20))
         self.label.setStyleSheet("background:none")
         self.label.setObjectName("label")
         RPG.setCentralWidget(self.centralwidget)
@@ -209,28 +210,7 @@ class Ui_RPG(object):
         self.fieldBOX.setHtml(_translate("RPG", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" cellspacing=\"2\" cellpadding=\"0\">\n"
-"<tr>\n"
-"<td>\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">Nom</span><span style=\" font-size:8pt;\">    </span></p></td>\n"
-"<td>\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">Classe</span><span style=\" font-size:8pt;\">     </span></p></td>\n"
-"<td>\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">PV</span><span style=\" font-size:8pt;\">    </span></p></td></tr>\n"
-"<tr>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Jill    </span></p></td>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Smith     </span></p></td>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">50    </span></p></td></tr>\n"
-"<tr>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Eve    </span></p></td>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Jackson     </span></p></td>\n"
-"<td>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">94  </span></p></td></tr></table></body></html>"))
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.label.setText(_translate("RPG", "<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">Terrain</span></p></body></html>"))
 
