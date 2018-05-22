@@ -528,17 +528,112 @@ class barbare(joueur):
         F = fld
         return {'attack':self.attack , 'all_in':self.double_tranchant, 'passif':self.passif}[nomduspell]()
 
-class freelance(joueur):
-    classname = 'freelance'
+class yolosaruken(joueur):
+    classname = 'yolosaruken'
     spike = 0
     dodge = 10
     armor = .1
     resistance = .1
-    ad = 30
-    att_cost = 30
+    ad = 5
+    att_cost = 15
     staminaMAX = 100
     pvMAX = 100
     speed = 100
+    help = [('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
+            ('healmate',95,'Soin de 100PV de soit et d\'un allié aléatoire'),
+            ('exodia',95,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
+            ('MembresExodia',85,'Multiplie par 10 les chances du sort "Exodia"'),
+            ('SurpriseMthrFcker',35,'Choisi une cible aléatoire et soit la soigne de 50 PV (50%) soit l\'attaque de 50 (50%)')]
+    def __init__(self,i,sk):
+        super().__init__(i,sk)
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
+        self.exodia_multiplier = 0
+
+    def classestr(self):
+        return 'Le prêtre japonais '+self.name+ ' a '+str(self.hp)+' PV, et maîtrise le hasard à la perfection'
+
+    def healmate(self):
+        if(self.stamina >= 95):
+            self.stamina -= 95
+        else:
+            return [('mess', self.name+' n\' a pas la force de soigner : Endurance à '+str(self.stamina))]
+
+        self.hp += 100
+        if self.hp > self.pvMAX :
+            self.hp = self.pvMAX
+        targetlist = [p for p in self.F.player if p.id != self.id]
+        if targetlist != []:
+            targ = targetlist[random.randint(0,len(targetlist) - 1)]
+            targ.hp += 100
+            if targ.hp > targ.pvMAX:
+                targ.hp = targ.pvMAX
+            return [('mess', self.name+' s\'est soigné et a soigné '+targ.name+" au passage")]
+        else:
+            return [('mess', self.name+' s\'est soigné et n\'a pas trouvé d\'énemis à soigner ')]
+    def suprisemothfcker(self):
+        if(self.stamina >= 35):
+            self.stamina -= 35
+        else:
+            return [('mess', self.name+' n\' a pas la force de surprendre : Endurance à '+str(self.stamina))]
+        if random.randint(0,1) == 0:
+            targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
+            targ = targetlist[random.randint(0,len(targetlist) - 1)]
+            return [('mess','Le hasard pointe '+targ.name+' et il se fait attaquer par '+self.name)] + self.attack_target(targ,50,'magique')
+        else:
+            targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
+            if targetlist == []:
+                return [('mess','Aucun ennemi n\'a pu être frappé')]
+            targ = targetlist[random.randint(0,len(targetlist) - 1)]
+            targ.hp += 50
+            if targ.hp > targ.pvMAX:
+                targ.hp = targ.pvMAX
+            return [('mess','Le hasard pointe '+targ.name+' et il se fait soigner par '+self.name)]
+    def exodia(self):
+        if(self.stamina >= 95):
+            self.stamina -= 95
+        else:
+            return [('mess', self.name+' n\' a pas la force d\'utiliser Exodia : Endurance à '+str(self.stamina))]
+        if self.exodia_multiplier >= 3 :
+            r = True
+        else:
+            r = (random.randint(0,(10**(3-self.exodia_multiplier))) == 0)
+        if r:
+            targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
+            if targetlist == []:
+                return [('mess','Aucun ennemi n\'a pu être frappé')]
+            targ = targetlist[random.randint(0,len(targetlist) - 1)]
+            return [('mess',self.name+" déchaine la puissance du hasard et inflige des dégats inifinis à "+targ.name)] + self.attack_target(targ,9999999,'brut')
+        else :
+            return [("mess","La tentative de meurtre de "+self.name+" échoue lamentablement")]
+    def membresExo(self):
+        if(self.stamina >= 85):
+            self.stamina -= 85
+        else:
+            return [('mess', self.name+' n\' a pas la force d\'appeler les membres d\'exodia : Endurance à '+str(self.stamina))]
+        
+        self.exodia_multiplier += 1
+        if self.exodia_multiplier >= 3 :
+            return [('mess',self.name+' peut maintenant executer des gens de façon certaine avec EXODIA')]
+        else:
+            return [('mess',self.name+' a maintenant une chance sur '+str( 10**(3-self.exodia_multiplier) )+' d\' executer des gens avec EXODIA')]
+
+    def attack(self):
+        try : target = findtarget(self)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
+        if(self.stamina >= self.att_cost):
+            self.stamina -= self.att_cost
+        else:
+            return [('mess', self.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
+        return [('mess', self.name + ' attaque '+ target.name )] + self.attack_target(target,self.ad,'physique')
+
+    def spell(self,nomduspell,fld):
+        global F
+        F = fld
+        return {'attack':self.attack , 'healmate':self.healmate, 'exodia':self.exodia, 'MembresExodia':self.membresExo, 'SurpriseMthrFcker':self.suprisemothfcker}[nomduspell]()
+
+
 
 class barde(joueur):
     classname = 'barde'
@@ -625,4 +720,4 @@ class lancier(joueur):
         F = fld
         return {'attack':self.attack , 'jump':self.jump}[nomduspell]()
 
-classes = [guerrier,ninja,mage_blanc,barbare,lancier]
+classes = [guerrier,ninja,mage_blanc,barbare,lancier,yolosaruken]

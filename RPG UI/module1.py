@@ -20,7 +20,7 @@ class com(QtCore.QThread):
             print('J\'ai essayé d\'émettre : '+str(a))
             self.commTrigger.emit(a)
 class MainWindow(Ui_RPG):
-    valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier']
+    valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier',"yolosaruken"]
     def __init__(self, frame):
         self.setupUi(frame)
         self.gameFrame.hide()

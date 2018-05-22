@@ -56,11 +56,11 @@ def get_infos(i):
         else:
             j = guerrier(i,sock)
             j.name = name
-            print('Joueur '+str(i)+' guerrier par defaut')
+            print('Joueur '+str(i)+' guerrier par defaut : ERRCLSS1')
     except:
         j = guerrier(i,sock)
         j.name = name
-        print('Joueur '+str(i)+' guerrier par defaut')
+        print('Joueur '+str(i)+' guerrier par defaut : ERRCLSS2')
     l.acquire()
     p.append(j)
     l.release()
@@ -160,7 +160,7 @@ def command(a,j): #gestion des commandes pendant un tour
         send(['mess',j.name+' a voulu faire quelque chose d\' impossible'],other_pl)
         print('Mauvaise commande de '+j.name+' : '+a)
         return True
-    a = a.strip().casefold()
+    a = a.strip()
     al = a.split()
     try:
         if(al[0] == 'fin'):
