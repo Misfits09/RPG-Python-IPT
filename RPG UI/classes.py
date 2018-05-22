@@ -463,7 +463,7 @@ class barbare(joueur):
     staminaMAX = 100
     pvMAX = 125
     speed = 75
-    help = [('passif',0,'le barbare augmente passivement sa force s\'il est frapppé'),
+    help = [('passif',0,'le barbare augmente passivement sa force s\'il est frappé'),
             ('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
             ('all_in',40,'augmente l\'attaque au prix de la défense ')]
     def __init__(self,i,sk):
@@ -540,7 +540,7 @@ class yolosaruken(joueur):
     pvMAX = 100
     speed = 100
     help = [('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
-            ('healmate',95,'Soin de 100PV de soit et d\'un allié aléatoire'),
+            ('healmate',95,'Soin de 100PV de soi et d\'un allié aléatoire'),
             ('exodia',95,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
             ('MembresExodia',85,'Multiplie par 10 les chances du sort "Exodia"'),
             ('SurpriseMthrFcker',35,'Choisi une cible aléatoire et soit la soigne de 50 PV (50%) soit l\'attaque de 50 (50%)')]
