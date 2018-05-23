@@ -562,7 +562,7 @@ class yolosaruken(joueur):
         self.hp += 100
         if self.hp > self.pvMAX :
             self.hp = self.pvMAX
-        targetlist = [p for p in self.F.player if p.id != self.id]
+        targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
         if targetlist != []:
             targ = targetlist[random.randint(0,len(targetlist) - 1)]
             targ.hp += 100
