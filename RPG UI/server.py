@@ -238,7 +238,7 @@ class MainWindow(Ui_Server):
         app.processEvents()
         for j in self.F.player:
             self.send(['setSpell',j.help],[j])
-            self.send(['setParam',[('id',j.id),('maxhp',j.pvMAX),('spell',j.staminaMAX)]],[j])
+            self.send(['setParam',[('id',j.id),('maxhp',j.pvMAX)]],[j])
         self.LeftButton.setText("Kick")
         self.LeftButton.clicked.disconnect()
         self.LeftButton.clicked.connect(self.kick)
