@@ -116,6 +116,8 @@ class MainWindow(Ui_RPG):
                 self.gameText.setText('A vous de jouer')
             elif a[1] == 'target':
                 self.send_updt(['name',self.pick(a[2])])
+        elif a[0] == 'turnof':
+            self.gameText.setText('Tour de '+a[1])
         elif a[0] == 'mess': #['alert','log']
             self.gameLog.append(a[1])
         elif a[0] == 'field': #['alert','log']
@@ -140,69 +142,39 @@ class MainWindow(Ui_RPG):
         self.connectButton.setText("En Attente")
         self.connectButton.setEnabled(False)
         app.processEvents()
-        self.send_updt(['classe', a])
+        self.send_updt(['get_infos',self.name,a])
 
-        def onGetConfirm2(a):
+        def onGetConfirm(a):
             self.macom.commTrigger.disconnect()
             self.macom.commTrigger.connect(self.infiniteloop)
-            print('OKKKKKKKK2')
             confirm = a
-            if(confirm[0] != "you"):
+            if(confirm[0] != "setSpell"):
                 self.connectButton.setText("Valider")
                 self.connectButton.setEnabled(True)
                 return self.failwith('Erreur communication')
-            self.HP.setProperty('maximum',int(confirm[1]))
-            self.setSpell(confirm[2])
+            self.setSpell(confirm[1])
             self.setupFrame.hide()
             self.BoxClass.hide()
             self.gameFrame.show()
             self.playeGui.show()
             app.processEvents()
-
-        def onGetConfirm(a):
-            self.macom.commTrigger.disconnect()
-            self.macom.commTrigger.connect(onGetConfirm2)
-            print('OKKKKKKKK')
-            confirm = a
-            if(confirm[0] != "field"):
-                self.connectButton.setText("Valider")
-                self.connectButton.setEnabled(True)
-                return self.failwith('Erreur communication')
-            fieldStr = """<html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"><table border="0" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;width:100%" cellspacing="2" cellpadding="0"><tr><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Nom</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Classe</span><span style=" font-size:8pt;">     </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">PV</span><span style=" font-size:8pt;">    </span></p></td></tr>"""
-            for p in confirm[1]:
-                fieldStr += """<tr><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+p[0]+"""</span></p></td><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+p[1]+""" </span></p></td><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+p[2]+"""</span></p></td></tr>"""
-            fieldStr += "</table></body></html>"
-            self.fieldBOX.setText(fieldStr)
         self.macom.commTrigger.connect(onGetConfirm)
-        
-        
-
-    #Envoi pseudo et Récupération Classe
-    def getClasse(self):
-        if self.ipBOX.text() == '':
-            return self.failwith('Nom Invalide, nom : '+self.ipBOX.text())
-        self.setParam([('name',self.ipBOX.text())])
-        self.send_updt( [ 'name',str(self.ipBOX.text())] )
-        self.connectButton.setText("En attente...")
-        self.connectButton.setEnabled(False)
-        app.processEvents()
-        def onGetClasse(a):
-            if(a != ["get_classe",True]):
-                self.connectButton.setText("Valider")
-                self.connectButton.setEnabled(True)
-                return self.failwith('Erreur communication')
-            self.ipBOX.hide()
-            self.BoxClass.show()
-            self.entete.setText('Recuperation Classe')
-            self.connectButton.setText("Valider Classe")
-            self.connectButton.setEnabled(False)
-            self.connectButton.setEnabled(True)
-            self.macom.commTrigger.disconnect()
-            self.connectButton.clicked.disconnect()
-            self.connectButton.clicked.connect(self.startGame)
-        self.macom.commTrigger.connect(onGetClasse)
         self.macom.start()
 
+    #Récupération Classe
+    def getClasse(self):
+        if self.ipBOX.text() == '':
+            return self.failwith('Veuillez entrer un nom')
+        self.setParam([('name',self.ipBOX.text())])
+        self.name = self.ipBOX.text()
+        app.processEvents()
+        self.ipBOX.hide()
+        self.BoxClass.show()
+        self.entete.setText('Recuperation Classe')
+        self.connectButton.setText("Valider Classe")
+        self.connectButton.clicked.disconnect()
+        self.connectButton.clicked.connect(self.startGame)
+        
     #Connection Et Recup pseudo
     def getPseudo(self):
         try:
@@ -260,7 +232,8 @@ class MainWindow(Ui_RPG):
                 self.pseudo.setText("<html><head/><body><p><span style=\" font-size:14pt; font-style:bold;\">"+str(b)+"</span></p></body></html>")
             elif a == 'id' :
                 self.pID.setText("<html><head/><body><p><span style=\" font-size:14pt;\">"+str(b)+"</span></p></body></html>")
-
+            elif a == 'maxhp' :
+                self.HP.setProperty('maximum',int(b))
 
 
 def boot():

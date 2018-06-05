@@ -6,6 +6,27 @@ class Empty_fld(Exception):
     pass
 class Spellcancel(Exception):
     pass
+class field():
+    def __init__(self,p):
+        self.player = p
+        self.nb = len(p)
+        for j in self.player:
+            j.set_field(self)
+    def isDead(self, joueur):
+        joueur.alive = False
+        self.nb -= 1
+        return ('death',joueur)
+    def __str__(self):
+        a = "\n Joueurs : "
+        for j in self.player:
+            a +='\n' + str(j)
+        return a
+    def getTable(self):
+        terrain=[]
+        for j in self.player:
+            terrain.append([str(j.id),j.name,j.classname,str(j.hp),str(j.stamina)])
+        return terrain
+
 class joueur():
     def __init__(self,i,sk): 
         self.id,self.name = i,str(i)
@@ -109,27 +130,6 @@ class joueur():
             rd = random.randint(1,100)
             if rd <= self.dodge:
                 return True,[('mess',self.name+' a esquivé l\'attaque')]
-
-class field():
-    def __init__(self,p):
-        self.player = p
-        self.nb = len(p)
-        for j in self.player:
-            j.set_field(self)
-    def isDead(self, joueur):
-        joueur.alive = False
-        self.nb -= 1
-        return ('death',joueur)
-    def __str__(self):
-        a = "\n Joueurs : "
-        for j in self.player:
-            a +='\n' + str(j)
-        return a
-    def getTable(self):
-        terrain=[]
-        for j in self.player:
-            terrain.append([j.name,j.classname,str(j.hp)])
-        return terrain
 
 def sendc(mss, p):
     print(str(mss))
@@ -437,7 +437,6 @@ class mage_blanc(joueur):
         if self.stamina <  100:
             return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         self.stamina -= 100
-        print('\n  Vous réanimez '+pl.name)
         pl.alive = True
         pl.hp = int(pl.pvMAX/2)
         F.nb += 1
