@@ -17,7 +17,6 @@ class com(QtCore.QThread):
     def run(self):
         while True :
             a = self.com()
-            print('J\'ai essayé d\'émettre : '+str(a))
             self.commTrigger.emit(a)
 class MainWindow(Ui_RPG):
     valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier',"yolosaruken"]
@@ -58,7 +57,6 @@ class MainWindow(Ui_RPG):
             return self.failwith('Pas assez d\'endurance')
         self.spells.setEnabled(False)
         self.gameText.setText('Lancement de : '+spellname)
-        print(str(['cmd','spell '+spellname]))
         self.send_updt(['cmd','spell '+spellname])
         app.processEvents()
 
@@ -78,7 +76,6 @@ class MainWindow(Ui_RPG):
         nbSpells = len(l)
         for x in l:
             self.Spellbuttons.append(QtWidgets.QPushButton(self.spells))
-            print(x[0])
         i = -1
         for x in self.Spellbuttons:
             i += 1
@@ -102,7 +99,6 @@ class MainWindow(Ui_RPG):
         else:
             return self.pick(liste)
     def infiniteloop(self,a):
-        print('IL')
         if a[0] == 'setParam': #['setParam',[('hp',15),('stamina',80)]]
             self.setParam(a[1])
         elif a[0] == 'setSpell': #['setParam',[('attack',15,'desc'),('heal',80,'desc')]]

@@ -132,7 +132,6 @@ class joueur():
                 return True,[('mess',self.name+' a esquivé l\'attaque')]
 
 def sendc(mss, p):
-    print(str(mss))
     time.sleep(.3)
     try:
         p.socket.send(pickle.dumps(mss))
@@ -142,7 +141,6 @@ def sendc(mss, p):
 def get_rspc(j):
     try:
         a=pickle.loads(j.socket.recv(1024))
-        print(str(a))
         return a
     except:
         return ['error',0]

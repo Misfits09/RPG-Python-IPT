@@ -23,7 +23,6 @@ class log(QtCore.QObject):
 
 class MainWindow(Ui_Server):
     def send(self,mss, lp = None):
-        self.log.emit(str(mss))
         time.sleep(.3)
         if lp == None :
             lp = self.F.player
@@ -37,7 +36,6 @@ class MainWindow(Ui_Server):
     def get_rsp(self,j):
         try:
             a=pickle.loads(j.socket.recv(1024))
-            self.log.emit(str(a))
             app.processEvents()
             return a
         except:
@@ -174,6 +172,7 @@ class MainWindow(Ui_Server):
                         if(obj == j): #Si le joueur meurt de lui même
                             self.send(['mess','Vous êtes mort en attaquant'],[j])
                             self.send(['mess', j.name+' est mort au combat'],other_pl)
+                            self.log.emit(j.name+' est mort au combat')
                             j.alive = False #Juste pour être sûre xD
                         else:
                             other_pl2 = other_pl.copy()
@@ -181,7 +180,9 @@ class MainWindow(Ui_Server):
                             self.send(['mess',' Vous avez tué '+obj.name],[j])
                             self.send(['mess','Vous avez ete tue par '+j.name],[obj])
                             self.send(['mess',j.name+' a tué '+obj.name],other_pl2)
+                            self.log.emit(j.name+' a tué '+obj.name)
                     elif typeR == 'mess':
+                        self.log.emit(obj)
                         self.send(['mess',obj])
                 return j.alive
             else:
@@ -199,6 +200,7 @@ class MainWindow(Ui_Server):
             fieldStr += """</tr>"""
         fieldStr += "</table></body></html>"
         self.fieldBOX.setText(fieldStr)
+        app.processEvents()
     def rStartTour(self,name): #Phrases aléatoires de début de tour
         l1 = ["*namej* est prêt à se battre !","Craignez la puissance *namej* :o","Cachez vous ! *namej* est prêt à jouer","*namej* va jouer mais personne n'a peur de lui ;-( ","*namej* commence son tour !","*namej* semble inarretable préparez vous à son tour"] 
         rint = random.randint(0,len(l1)-1)
@@ -268,6 +270,7 @@ class MainWindow(Ui_Server):
                             if(obj == j): #Si le joueur meurt de lui même
                                 self.send(['mess','Vous êtes mort au debut de votre tour'],[j])
                                 self.send(['mess', j.name+' est mort en commencant son tour'],other_pl)
+                                self.log.emit(j.name+' est mort en commencant son tour')
                                 j.alive = False #Juste pour être sûre xD
                                 break
                             else:
@@ -276,20 +279,23 @@ class MainWindow(Ui_Server):
                                 self.send(['mess',' Vous avez tué '+obj.name],[j])
                                 self.send(['mess',j.name+ ' vous a tué '],[obj])
                                 self.send(['mess',j.name+' a tué '+obj.name],other_pl2)
+                                self.log.emit(j.name+' a tué '+obj.name)
                         elif typeR == 'mess':
                             self.send(['mess',obj])
+                            self.log.emit(obj)
                     cd = True
                     self.send_param()
                     while cd:
                         self.send(['get_c','main'],[j])
                         ms = self.get_rsp(j)
                         if ms[0] == 'cmd':
-                            print(str(ms[1]))
+                            self.log.emit(str(ms[1]))
                             cd = self.command(ms[1],j)
                         self.send_param()
                 except: pass
             self.send_param()
             self.send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
+            self.log.emit('\n \n     --FIN DE TOUR '+str(i)+'--   \n \n')
             if( self.F.nb == 1):
                 self.send_param()
                 a = 'Fin de la partie, le gagnant est : '+[pl for pl in self.F.player if pl.alive == True][0].name
