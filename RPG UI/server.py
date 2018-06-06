@@ -16,8 +16,8 @@ class threads(QtCore.QThread):
         self.args = args
     def run(self):
         self.target(*self.args)
-class fldedit(QtCore.QObject):
-    event = QtCore.pyqtSignal()
+class signals(QtCore.QObject):
+    fld_updt = QtCore.pyqtSignal()
 class log(QtCore.QObject):
     out = QtCore.pyqtSignal(str)
 
@@ -61,8 +61,8 @@ class MainWindow(Ui_Server):
         self.log = self.logevent.out
         self.log.connect(self.gameLog.append)
         self.table = []
-        self.tableevent = fldedit()
-        self.tableevent.event.connect(self.printfld)
+        self.signals = signals()
+        self.signals.fld_updt.connect(self.printfld)
         self.players=[]
         self.plock = Lock()
     
@@ -150,7 +150,7 @@ class MainWindow(Ui_Server):
             self.players.append(j)
             self.table.append([str(j.id),j.name,j.classname,str(j.hp),str(j.stamina)])
             self.plock.release()
-            self.tableevent.event.emit()
+            self.signals.fld_updt.emit()
     
     def command(self,a,j): #gestion des commandes pendant un tour
         other_pl = [y for y in self.F.player if y != j]
@@ -206,7 +206,7 @@ class MainWindow(Ui_Server):
     def send_param(self):    
         self.send(['field',[(p[1],p[2],p[3]) for p in self.F.getTable()]])
         self.table =self.F.getTable()
-        self.tableevent.event.emit()
+        self.signals.fld_updt.emit()
         for k in self.F.player:
             self.send(['setParam',[('hp',k.hp),('stamina',k.stamina)]],[k])
     def kick (self):
