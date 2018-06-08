@@ -210,13 +210,13 @@ class guerrier(joueur):
     dodge = 0
     armor = .25
     resistance = .10
-    ad = 25
+    ad = 17.5
     att_cost = 30
     staminaMAX = 100
     pvMAX = 150
     speed = 50
     help = [('block',40,'réduit les dégâts physiques pendant un tour'),
-            ('protect',40,'encaisse la prochaine attaque à la place de la cible'),
+            ('protect',30,'encaisse la prochaine attaque à la place de la cible'),
             ('attack',att_cost,'attaque de base')]
     def classestr(self):
         return 'Guerrier '+self.name+' a '+str(self.hp)+' PV, une armure moyenne et un bon bouclier !'
@@ -246,9 +246,9 @@ class guerrier(joueur):
         try : pl = findtarget(self)
         except Empty_fld : return [('mess','Aucune cible disponible')]
         except Spellcancel : return []
-        if self.stamina < 40 :
+        if self.stamina < 30 :
             return [('mess', self.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
-        self.stamina -= 40
+        self.stamina -= 30
         pl.trigger.addT(self.protection)
         return [('mess',self.name+' protège '+pl.name)]
     def protection(self,source,target,amount,dtype):
@@ -276,23 +276,25 @@ class guerrier(joueur):
 class ninja(joueur):
     classname = 'ninja'
     spike = 0
-    dodge = 20
+    dodge = 30
     armor = 0
     resistance = 0
-    ad = 40
+    base_ad = 17.5
     att_cost = 25
     staminaMAX = 100
     pvMAX = 85
     speed = 150
     help = [('hide',40, 'Se cache pendant un tour et ne peut plus attaquer'),
             ('attack',att_cost,'Attaque physique de base'),
-            ('esquive',35,'Esquive la prochaine attaque')]
+            ('esquive',35,'Esquive la prochaine attaque'),
+            ('affutage',30,'Augmente légèrement les dégâtes infligés'),]
 
     def __init__(self,i,sk):
         super().__init__(i,sk)
         self.lastTurnHide = False
         self.hp = self.pvMAX
         self.stamina = self.staminaMAX
+        self.ad = self.base_ad
 
     #Se cacher pendant un tour (si dtype != zone)
     def hide(self): #Se retire au bout d'un tour
@@ -316,8 +318,14 @@ class ninja(joueur):
         self.trigger.remTrRes(self.endHiding)
         self.trigger.remT(self.hiding)
         return [('mess', self.name + ' est sorti de sa cachette')]
-
-
+    
+    def affutage(self):
+        if self.stamina < 30 :
+            return [('mess', self.name+' n\'a pas la force de renforcer son attaque : Endurance à '+str(self.stamina))]
+        self.stamina -= 30
+        self.ad += 6
+        return [('mess',self.name + ' a renforcé sa force d\'attaque')]
+    
     def attack(self):
         try : target = findtarget(self)
         except Empty_fld : return [('mess','Aucune cible disponible')]
@@ -342,7 +350,7 @@ class ninja(joueur):
     def spell (self,nomduspell, fld):
         global F
         F = fld
-        return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive}[nomduspell]()
+        return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive,'affutage':self.affutage}[nomduspell]()
     def classestr(self):
         return 'Maître Ninja '+self.name+' a '+str(self.hp)+' PV, et un entrainement aux arts martiaux !'
 
@@ -364,8 +372,8 @@ class mage_blanc(joueur):
     dodge = 0
     armor = .25
     resistance = .30
-    ad = 30
-    att_cost = 25
+    ad = 10
+    att_cost = 20
     staminaMAX = 100
     pvMAX = 100
     speed = 115
@@ -455,7 +463,7 @@ class barbare(joueur):
     dodge = 0
     basearmor = .2
     baseresistance = .15
-    basead = 35
+    basead = 20
     att_cost = 30
     staminaMAX = 100
     pvMAX = 125
@@ -482,7 +490,7 @@ class barbare(joueur):
         if self.stamina < 40:
             return [('mess',self.name+' n\' a pas la force de se booster')]
         self.stamina -= 40
-        self.ad += 15
+        self.ad += 10
         self.armor = -.25
         self.resistance = -.25
         self.trigger.remDmg(self.spikes)
@@ -498,8 +506,8 @@ class barbare(joueur):
     #passif: augmenter l'ad et le crit si frappé
     def berzerk(self,source,target,amount,dtype):
         if dtype != 'spike':
-            self.berzdmg += 5
-            self.crit += 10
+            self.berzdmg += 2.5
+            self.crit += 7
             return amount,[('mess','la rage de '+self.name+' monte')]
     
     #attaque de base
@@ -574,13 +582,11 @@ class yolosaruken(joueur):
         else:
             return [('mess', self.name+' n\' a pas la force de surprendre : Endurance à '+str(self.stamina))]
         if random.randint(0,1) == 0:
-            targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
+            targetlist = [p for p in self.F.player if p.alive]
             targ = targetlist[random.randint(0,len(targetlist) - 1)]
             return [('mess','Le hasard pointe '+targ.name+' et il se fait attaquer par '+self.name)] + self.attack_target(targ,50,'magique')
         else:
-            targetlist = [p for p in self.F.player if p.id != self.id and p.alive]
-            if targetlist == []:
-                return [('mess','Aucun ennemi n\'a pu être frappé')]
+            targetlist = [p for p in self.F.player if p.alive]
             targ = targetlist[random.randint(0,len(targetlist) - 1)]
             targ.hp += 50
             if targ.hp > targ.pvMAX:
