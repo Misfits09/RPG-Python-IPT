@@ -6,6 +6,10 @@ class Empty_fld(Exception):
     pass
 class Spellcancel(Exception):
     pass
+class NoStamina(Exception):
+    pass
+class Spellerror(Exception):
+    pass
 class field():
     def __init__(self,p):
         self.player = p
@@ -56,7 +60,7 @@ class joueur():
                 self.trigger.dec_counter(fct)
             else:
                 try :
-                    commlist += fct(self)
+                    commlist += fct()
                 except : pass
         return commlist
     
@@ -160,10 +164,9 @@ def findtarget(j,alive = True):
         for pl in F.player:
             if(pl.name.casefold().strip() == name.casefold().strip() and (pl.alive == alive)):
                 plFound = True
-                sendc(['mess','\n  Vous ciblez '+pl.name],j)
                 return pl
         if (not plFound):
-            sendc(['mess','\n  Aucun joueur avec ce nom n\' a ete trouvé ou alors il est déjà mort'],j)
+            raise Empty_fld
 
 class triggers():
     def __init__(self):
@@ -216,7 +219,7 @@ class guerrier(joueur):
     pvMAX = 150
     speed = 50
     help = [('block',40,'réduit les dégâts physiques pendant un tour'),
-            ('protect',30,'encaisse la prochaine attaque à la place de la cible'),
+            ('protect',30,'encaisse les attaques à la place de la cible (un tour)'),
             ('attack',att_cost,'attaque de base')]
     def classestr(self):
         return 'Guerrier '+self.name+' a '+str(self.hp)+' PV, une armure moyenne et un bon bouclier !'
@@ -224,49 +227,69 @@ class guerrier(joueur):
         super().__init__(i,sk)
         self.hp = self.pvMAX
         self.stamina = self.staminaMAX
+        self.protecting = None
 
     #bloquer la prochaine attaque (dmgtrigger sur soi)
     def block(self):
         if self.stamina < 40 :
             return [('mess', self.name+' n\'a pas la force de bloquer : Endurance à '+str(self.stamina))]
-        self.stamina = 0
+        self.stamina -= 40
         self.trigger.addDmg(self.blocking)
         self.trigger.addTrRes(0,self.removeblocking)
         return [('mess', self.name+' se prépare à bloquer')]
     def blocking(self,source,target,amount,dtype):
         if dtype == 'physique':
             return amount/2,[('mess',self.name+' bloque l\'attaque')]
-    def removeblocking(self,holder):
+    def removeblocking(self):
         self.trigger.remDmg(self.blocking)
         self.trigger.remTrRes(self.removeblocking)
         return [('mess',self.name + ' ne bloque plus les coups')]
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
-    def protect (self):
+    def protect (self,target):
         if self.stamina < 30 :
             return [('mess', self.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
-        try : pl = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+        if not target.alive:
+            return[('mess',target.name+' est morte et ne peut pas être protégée')]
         self.stamina -= 30
-        pl.trigger.addT(self.protection)
-        return [('mess',self.name+' protège '+pl.name)]
+        target.trigger.addT(self.protection)
+        self.trigger.addTrRes(0,self.remprotect)
+        self.protecting = target
+        return [('mess',self.name+' protège '+target.name)]
     def protection(self,source,target,amount,dtype):
         if dtype == 'physique':
-            target.trigger.remT(self.protection)
             return True,([('mess',self.name+' encaisse l\'attaque à sa place')] + source.hit_attack(self,amount,dtype))
-    
+    def remprotect(self):
+        self.protecting.trigger.remT(self.protection)
+        self.trigger.remTrRes(self.removeblocking)
+
     #lancer un sort
     def spell (self,nomduspell,fld):
         global F
         F = fld
-        return {'block':self.block , 'protect':self.protect , 'attack':self.attack}[nomduspell]()
-    
+        if nomduspell == 'block':
+            if self.stamina < 40 :
+                raise NoStamina
+            self.stamina -= 40
+            return (0,self.block,self)
+        elif nomduspell == 'protect':
+            if self.stamina < 30 :
+                raise NoStamina
+            self.stamina -= 30
+            pl = findtarget(self)
+            return (0,self.protect,self,pl)
+        elif nomduspell == 'attack':
+            if(self.stamina >= self.att_cost):
+                self.stamina -= self.att_cost
+            else:
+                raise NoStamina
+            pl = findtarget(self)
+            return (1/self.speed,self.attack,self,pl)
+        
     #attaque de base
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -302,7 +325,7 @@ class ninja(joueur):
             return [('mess', self.name+' n\'a pas la force de se cacher : Endurance à '+str(self.stamina))]
         elif self.lastTurnHide :
             return [('mess', self.name+' a encore voulu se cacher mais n\'a pas pu')]
-        self.stamina = 0
+        self.stamina -= 50
         self.lastTurnHide = True
         self.trigger.addT(self.hiding)
         self.trigger.addTrRes(0,self.endHiding)
@@ -310,11 +333,11 @@ class ninja(joueur):
         return [('mess', self.name+' est caché ! Mon dieu... où est-il passé ?!')]
     def hiding(self,source,target,amount,dtype):
         return True,[('mess',self.name + ' est trop bien caché et l\'attaque part dans le vent...')]
-    def canHide(self,holder):
+    def canHide(self):
         self.lastTurnHide = False
         self.trigger.remTrRes(self.canHide)
         return []
-    def endHiding(self,holder):
+    def endHiding(self):
         self.trigger.remTrRes(self.endHiding)
         self.trigger.remT(self.hiding)
         return [('mess', self.name + ' est sorti de sa cachette')]
@@ -326,10 +349,9 @@ class ninja(joueur):
         self.ad += 6
         return [('mess',self.name + ' a renforcé sa force d\'attaque')]
     
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -350,7 +372,29 @@ class ninja(joueur):
     def spell (self,nomduspell, fld):
         global F
         F = fld
-        return {'hide':self.hide , 'attack':self.attack, 'esquive': self.esquive,'affutage':self.affutage}[nomduspell]()
+        if nomduspell == 'hide':
+            if self.lastTurnHide:
+                raise Spellerror
+            if self.stamina < 50:
+                raise NoStamina
+            self.stamina -= 50
+            return (0,self.hide,self)
+        elif nomduspell == 'attack':
+            if self.stamina < self.att_cost:
+                raise NoStamina
+            self.stamina -= self.att_cost
+            target = findtarget(self)
+            return (1/self.speed,self.attack,self,target)
+        elif nomduspell == 'esquive':
+            if self.stamina < 35:
+                raise NoStamina
+            self.stamina -= 35
+            return (1/self.speed,self.esquive,self)
+        elif nomduspell == 'affutage':
+            if self.stamina < 30:
+                raise NoStamina
+            self.stamina -= 30
+            return (1/self.speed,self.affutage,self)
     def classestr(self):
         return 'Maître Ninja '+self.name+' a '+str(self.hp)+' PV, et un entrainement aux arts martiaux !'
 
@@ -388,60 +432,56 @@ class mage_blanc(joueur):
         self.stamina = self.staminaMAX
         self.godshielding = None
 
-    def soin(self):
+    def soin(self,tg):
+        if not tg.alive:
+            return [('mess',self.name+' essaye de soigner '+tg.name+' mais il est mort')]
         if self.stamina < 30:
             return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour soigner : '+str(self.stamina))]
-        try : tg = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
         self.stamina -= 30
         tg.hp += 25
         if tg.hp > tg.pvMAX:
             tg.hp = tg.pvMAX
-        return [('mess',tg.name + ' a été soigné par '+self.name+' et a maintenant '+str(tg.hp)+' PV')]
+        return [('mess',tg.name + ' a été soigné de 25 PV par '+self.name)]
 
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
             return [('mess', self.name+' n\' a pas la force d\'attaquer : Endurance à '+str(self.stamina))]
         return [('mess', self.name + ' attaque '+ target.name )] + self.attack_target(target,self.ad,'magique')
     
-    def godshield(self):
+    def godshield(self,tg):
+        if not tg.alive:
+            return [('mess',self.name+' ne peut protéger '+tg.name+' car il est mort')]
         if self.stamina <  100:
             return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
         elif self.hasDoneGS:
             return [('mess',self.name + ' ne peut pas canaliser un nouveau bouclier divin ')]
-        try : tg = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
         self.stamina -= 100
-        tg.trigger.addT(self.isGodShielded)
+        tg.trigger.addDmg(self.isGodShielded)
         self.trigger.addTrRes(0,self.remGodShield)
         self.trigger.addTrRes(1,self.canGodShield)
         self.godshielding = tg
         self.hasDoneGS = True
         return [('mess',tg.name + ' a reçu une protection divine par '+self.name)]
     def isGodShielded(self,src,tg,amount,dtyp):
-        return True,[('mess',tg.name +' est protégé par les dieux')]
-    def remGodShield(self,holder):
+        return 0,[('mess',tg.name +' est protégé par les dieux')]
+    def remGodShield(self):
         self.godshielding.trigger.remT(self.isGodShielded)
         self.trigger.remTrRes(self.remGodShield)
         return [('mess','Le bouclier divin de '+self.godshielding.name+' est tombé')]
-    def canGodShield(self,holder):
+    def canGodShield(self):
         self.trigger.remTrRes(self.canGodShield)
         self.hasDoneGS = False
         return []
 
-    def reborn(self):
+    def reborn(self,pl):
+        if pl.alive:
+            return [('mess',self.name+' essaye de ressuciter '+pl.name+' mais il n\'est pas mort')]
         if self.stamina <  100:
             return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
-        try : pl = findtarget(self,False)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
         self.stamina -= 100
         pl.alive = True
         pl.hp = int(pl.pvMAX/2)
@@ -451,9 +491,33 @@ class mage_blanc(joueur):
     def spell (self,nomduspell, fld):
         global F
         F = fld
-        return {'soin':self.soin , 'reborn':self.reborn, 'godshield': self.godshield,'attack': self.attack}[nomduspell]()
-
-
+        if nomduspell == 'soin':
+            if self.stamina < 30:
+                raise NoStamina
+            self.stamina -= 30
+            target = findtarget(self)
+            return (1/self.speed,self.soin,self,target)
+        elif nomduspell == 'reborn':
+            if self.stamina < 100:
+                raise NoStamina
+            self.stamina -= 100
+            target = findtarget(self,False)
+            return (1/self.speed,self.reborn,self,target)
+        elif nomduspell == 'godshield':
+            if self.hasDoneGS:
+                raise Spellerror
+            if self.stamina < 100:
+                raise NoStamina
+            self.stamina -= 100
+            target = findtarget(self)
+            return (1/self.speed,self.godshield,self,target)
+        elif nomduspell == 'attack':
+            if self.stamina < self.att_cost:
+                raise NoStamina
+            self.stamina -= self.att_cost
+            target = findtarget(self)
+            return (1/self.speed,self.attack,self,target)
+        
     def classestr(self):
         return 'Mage Blanc '+self.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
     
@@ -496,7 +560,7 @@ class barbare(joueur):
         self.trigger.remDmg(self.spikes)
         self.trigger.addTrRes(1,self.remboost)
         return [('mess',self.name+' prend une posture offensive mais risquée')]
-    def remboost(self,holder):
+    def remboost(self):
         self.ad = self.basead
         self.armor = self.basearmor
         self.resistance = self.baseresistance
@@ -511,10 +575,9 @@ class barbare(joueur):
             return amount,[('mess','la rage de '+self.name+' monte')]
     
     #attaque de base
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -525,14 +588,24 @@ class barbare(joueur):
                     self.attack_target(target,(self.ad+self.berzdmg)*2,'physique'))
         else :
             return [('mess', self.name + ' attaque '+ target.name )] + self.attack_target(target,self.ad+self.berzdmg,'physique')
-    def passif(self):
-        return [('mess','Le passif n\'est pas activable')]
     #lancer un sort
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        return {'attack':self.attack , 'all_in':self.double_tranchant, 'passif':self.passif}[nomduspell]()
-
+        if nomduspell == 'attack':
+            if self.stamina < self.att_cost :
+                raise NoStamina
+            self.stamina -= self.att_cost
+            target = findtarget(self)
+            return (1/self.speed,self.attack,self,target)
+        elif nomduspell == 'all_in':
+            if self.stamina <= 40:
+                raise NoStamina
+            self.stamina -= 40
+            return (0,self.double_tranchant,self)
+        elif nomduspell == 'passif':
+            raise Spellerror
+        
 class yolosaruken(joueur):
     classname = 'yolosaruken'
     spike = 0
@@ -559,8 +632,8 @@ class yolosaruken(joueur):
         return 'Le prêtre japonais '+self.name+ ' a '+str(self.hp)+' PV, et maîtrise le hasard à la perfection'
 
     def healmate(self):
-        if(self.stamina >= 95):
-            self.stamina -= 95
+        if(self.stamina >= 100):
+            self.stamina -= 100
         else:
             return [('mess', self.name+' n\' a pas la force de soigner : Endurance à '+str(self.stamina))]
 
@@ -573,9 +646,9 @@ class yolosaruken(joueur):
             targ.hp += 100
             if targ.hp > targ.pvMAX:
                 targ.hp = targ.pvMAX
-            return [('mess', self.name+' s\'est soigné et a soigné '+targ.name+" au passage")]
+            return [('mess', self.name+' s\'est soigné et a soigné '+targ.name+" au passage de 100 PV")]
         else:
-            return [('mess', self.name+' s\'est soigné et n\'a pas trouvé d\'énemis à soigner ')]
+            return [('mess', self.name+' s\'est soigné de 100 PV et n\'a pas trouvé d\'énemis à soigner ')]
     def suprisemothfcker(self):
         if(self.stamina >= 35):
             self.stamina -= 35
@@ -593,8 +666,8 @@ class yolosaruken(joueur):
                 targ.hp = targ.pvMAX
             return [('mess','Le hasard pointe '+targ.name+' et il se fait soigner par '+self.name)]
     def exodia(self):
-        if(self.stamina >= 95):
-            self.stamina -= 95
+        if(self.stamina >= 100):
+            self.stamina -= 100
         else:
             return [('mess', self.name+' n\' a pas la force d\'utiliser Exodia : Endurance à '+str(self.stamina))]
         if self.exodia_multiplier >= 3 :
@@ -621,10 +694,9 @@ class yolosaruken(joueur):
         else:
             return [('mess',self.name+' a maintenant une chance sur '+str( 10**(3-self.exodia_multiplier) )+' d\' executer des gens avec EXODIA')]
 
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -634,6 +706,32 @@ class yolosaruken(joueur):
     def spell(self,nomduspell,fld):
         global F
         F = fld
+        if nomduspell == 'attack':
+            if self.stamina < self.att_cost:
+                raise NoStamina
+            self.stamina -= self.att_cost
+            target = findtarget(self)
+            return (1/self.speed,self.attack,self,target)
+        elif nomduspell == 'healmate':
+            if self.stamina < 100:
+                raise NoStamina
+            self.stamina -= 100
+            return (1/self.speed,self.healmate,self)
+        elif nomduspell == 'exodia':
+            if self.stamina < 100:
+                raise NoStamina
+            self.stamina -= 100
+            return (1/self.speed,self.exodia,self)
+        elif nomduspell == 'DisciplesExodia':
+            if self.stamina < 85:
+                raise NoStamina
+            self.stamina -= 85
+            return (1/self.speed,self.membresExo,self)
+        elif nomduspell == 'SurpriseMthrFcker':
+            if self.stamina < 35:
+                raise NoStamina
+            self.stamina -= 35
+            return (1/self.speed,self.suprisemothfcker,self)
         return {'attack':self.attack , 'healmate':self.healmate, 'exodia':self.exodia, 'DisciplesExodia':self.membresExo, 'SurpriseMthrFcker':self.suprisemothfcker}[nomduspell]()
 
 class barde(joueur):
@@ -684,10 +782,9 @@ class lancier(joueur):
         return 'Lancier '+self.name+' a '+str(self.hp)+' PV, une lance et saute très haut'
     
     #Attaque de base
-    def attack(self):
-        try : target = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
+    def attack(self,target):
+        if not target.alive:
+            return [('mess',self.name+' essaie de frapper '+target.name+' mais il est déjà mort')]
         if(self.stamina >= self.att_cost):
             self.stamina -= self.att_cost
         else:
@@ -695,13 +792,11 @@ class lancier(joueur):
         return [('mess', self.name + ' attaque '+ target.name )] + self.attack_target(target,self.ad,'physique')
 
     #saut
-    def jump(self):
+    def jump(self,target):
         if self.stamina < 40:
             return [('mess', self.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
-        try : self.jumptarget = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
-        self.stamina = 0
+        self.jumptarget = target
+        self.stamina -= 40
         self.lastTurnJump = True
         self.trigger.addT(self.jumping)
         self.trigger.addTrRes(0,self.land)
@@ -709,11 +804,13 @@ class lancier(joueur):
         return [('mess',self.name+' saute très haut')]
     def jumping(self,source,target,amount,dtype):
         return True,[('mess',self.name + ' est en l\'air et évite l\'attaque')]
-    def land(self,holder):
+    def land(self):
         self.trigger.remTrRes(self.land)
         self.trigger.remT(self.jumping)
+        if not self.jumptarget.alive:
+            return [('mess',self.name+' atterit sur '+self.jumptarget.name+' mais il est déjà mort')]
         return [('mess',self.name+' atterrit sur '+self.jumptarget.name)]+self.attack_target(self.jumptarget,self.ad*2,'physique')
-    def canjump(self,holder):
+    def canjump(self):
         self.lastTurnJump = False
         self.trigger.remTrRes(self.canjump)
         return []
@@ -744,6 +841,24 @@ class lancier(joueur):
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        return {'attack':self.attack , 'jump':self.jump , 'ProPecTorat':self.ProPecTorat,'passif':self.passif}[nomduspell]()
+        if nomduspell == 'passif':
+            raise Spellerror
+        elif nomduspell == 'attack':
+            if self.stamina < self.att_cost :
+                raise NoStamina
+            self.stamina -= self.att_cost
+            target = findtarget(self)
+            return (1/self.speed,self.attack,self,target)
+        elif nomduspell == 'ProPecTorat':
+            if self.stamina < 40:
+                raise NoStamina
+            self.stamina -= 40
+            return (0,self.ProPecTorat,self)
+        elif nomduspell == 'jump':
+            if self.stamina < 40 :
+                raise NoStamina
+            self.stamina -= 40
+            target = findtarget(self)
+            return (1/self.speed,self.jump,self,target)
 
 classes = [guerrier,ninja,mage_blanc,barbare,lancier,yolosaruken]

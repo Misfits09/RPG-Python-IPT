@@ -6,24 +6,19 @@ import socket
 import pickle
 import random
 from classes import *
-from threading import Event,Lock
+from threading import Thread,Event,Lock
 import sys
 
-class threads(QtCore.QThread):
-    def __init__(self,fct,args = ()):
-        super().__init__()
-        self.target = fct
-        self.args = args
-    def run(self):
-        self.target(*self.args)
+
 class signals(QtCore.QObject):
     fld_updt = QtCore.pyqtSignal()
+    spell_end = QtCore.pyqtSignal(list)
 class log(QtCore.QObject):
     out = QtCore.pyqtSignal(str)
 
 class MainWindow(Ui_Server):
     def send(self,mss, lp = None):
-        time.sleep(.3)
+        time.sleep(.1)
         if lp == None :
             lp = self.F.player
         try:
@@ -61,6 +56,7 @@ class MainWindow(Ui_Server):
         self.table = []
         self.signals = signals()
         self.signals.fld_updt.connect(self.printfld)
+        self.signals.spell_end.connect(self.validerspells)
         self.players=[]
         self.plock = Lock()
     
@@ -72,7 +68,7 @@ class MainWindow(Ui_Server):
         self.LeftButton.clicked.connect(self.start_game)
         self.event = Event()
         self.log.emit('En attente de joueurs')
-        self.connectthread = threads(self.search_ip)
+        self.connectthread = Thread(target=self.search_ip)
         self.connectthread.start()
     def connect_ssip(self):
         self.RightButton.setEnabled(False)
@@ -82,7 +78,7 @@ class MainWindow(Ui_Server):
         self.LeftButton.clicked.connect(self.start_game)
         self.event = Event()
         self.log.emit('En attente de joueurs')
-        self.connectthread = threads(self.search_ssip)
+        self.connectthread = Thread(target=self.search_ssip)
         self.connectthread.start()
     
     def search_ip(self):
@@ -94,8 +90,8 @@ class MainWindow(Ui_Server):
             s.settimeout(1.)
             while not self.event.is_set():
                 try : 
-                    sock,address = s.accept()
-                    t = threads(self.get_infos,(i,sock))
+                    sock,_unused = s.accept()
+                    t = Thread(target=self.get_infos,args=(i,sock))
                     t.start()
                     i += 1
                 except socket.timeout : pass
@@ -111,11 +107,11 @@ class MainWindow(Ui_Server):
             s.listen()
             while not self.event.is_set() :
                 try :
-                    message, address = s2.recvfrom(1024)
+                    _unused, address = s2.recvfrom(1024)
                     connections += 1
                     s2.sendto(pickle.dumps("Hi there"),address)
                     sock,address = s.accept()
-                    th = threads(self.get_infos,(connections,sock))
+                    th = Thread(target=self.get_infos,args=(connections,sock))
                     th.start()
                 except socket.timeout: pass
 
@@ -150,45 +146,44 @@ class MainWindow(Ui_Server):
             self.plock.release()
             self.signals.fld_updt.emit()
     
-    def command(self,a,j): #gestion des commandes pendant un tour
-        other_pl = [y for y in self.F.player if y != j]
-        def wrong_c(j):
-            self.send(['mess','\n Commande incomprise '+a+' : Vérifiez votre commande'],[j])
-            self.send(['mess',j.name+' a voulu faire quelque chose d\' impossible'],other_pl)
-            self.log.emit('Mauvaise commande de '+j.name+' : '+a)
-            return True
-        a = a.strip()
-        al = a.split()
-        try:
-            if(al[0] == 'fin'):
-                self.log.emit('\n    -Fin du tour de '+j.name+'-   \n \n')
-                self.send(['mess',j.name+' a fini de se battre'])
-                return False
-            elif(al[0] == 'spell'):
-                try: toshow = j.spell(al[1],self.F)
-                except: return wrong_c(j)
-                for typeR,obj in toshow:
-                    if typeR == 'death':
-                        if(obj == j): #Si le joueur meurt de lui même
-                            self.send(['mess','Vous êtes mort en attaquant'],[j])
-                            self.send(['mess', j.name+' est mort au combat'],other_pl)
-                            self.log.emit(j.name+' est mort au combat')
-                            j.alive = False #Juste pour être sûre xD
-                        else:
-                            other_pl2 = other_pl.copy()
-                            other_pl2.remove(obj)
-                            self.send(['mess',' Vous avez tué '+obj.name],[j])
-                            self.send(['mess','Vous avez ete tue par '+j.name],[obj])
-                            self.send(['mess',j.name+' a tué '+obj.name],other_pl2)
-                            self.log.emit(j.name+' a tué '+obj.name)
-                    elif typeR == 'mess':
-                        self.log.emit(obj)
-                        self.send(['mess',obj])
-                return j.alive
-            else:
-                return wrong_c(j)
-        except:
-            return wrong_c(j)
+    def command(self,j): #gestion des commandes pendant un tour
+        sotstamina = j.stamina
+        cd = True
+        self.send_param()
+        spelllist = []
+        while cd:
+            self.send(['get_c','main'],[j])
+            ms = self.get_rsp(j)
+            if ms[0] == 'cmd':
+                self.log.emit(str(ms[1]))
+                al = ms[1].strip().split()
+                if(al[0] == 'fin'):
+                    self.log.emit('    -'+j.name+'- A choisi ses actions')
+                    self.send(['mess','Attente des autres joueurs...'],[j])
+                    cd = False
+                elif(al[0] == 'spell'):
+                    try:
+                        toshow = j.spell(al[1],self.F)
+                        self.log.emit(str(toshow))
+                        if len(toshow) == 3:
+                            self.send(['spell',al[1]],[j])
+                        elif len(toshow) == 4:
+                            self.send(['spell',al[1]+' : '+toshow[3].name],[j])
+                        spelllist.append(toshow)
+                    except Empty_fld : self.send(['alert','erreur','Aucune cible disponible'],[j])
+                    except NoStamina : self.send(['alert','erreur','Pas assez d\'endurance'],[j])
+                    except Spellerror : self.send(['alert','erreur','Impossible de lancer ce sort'],[j])
+                    except : pass
+                elif al[0] == 'cancel':
+                    a = spelllist.pop()
+                    a = a[1].__name__
+                    for h in j.help:
+                        if h[0] == a:
+                            j.stamina += h[1]
+            self.send_param()
+        j.stamina = sotstamina
+        self.send_param()
+        self.signals.spell_end.emit(spelllist)
         
     def printfld(self):
         fieldStr = """<html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"><table border="0" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;width:100%" cellspacing="2" cellpadding="0"><tr><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">ID</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Nom</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Classe</span><span style=" font-size:8pt;">     </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">PV</span><span style=" font-size:8pt;">    </span></p></td> </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Stamina</span><span style=" font-size:8pt;">    </span></p></td> </tr>"""
@@ -201,10 +196,6 @@ class MainWindow(Ui_Server):
         fieldStr += "</table></body></html>"
         self.fieldBOX.setText(fieldStr)
         app.processEvents()
-    def rStartTour(self,name): #Phrases aléatoires de début de tour
-        l1 = ["*namej* est prêt à se battre !","Craignez la puissance *namej* :o","Cachez vous ! *namej* est prêt à jouer","*namej* va jouer mais personne n'a peur de lui ;-( ","*namej* commence son tour !","*namej* semble inarretable préparez vous à son tour"] 
-        rint = random.randint(0,len(l1)-1)
-        return l1[rint].replace('*namej*',name)
     def send_param(self):    
         self.send(['field',[(p[1],p[2],p[3],p[5]) for p in self.F.getTable()]])
         self.table =self.F.getTable()
@@ -251,70 +242,122 @@ class MainWindow(Ui_Server):
         self.RightButton.clicked.connect(self.exitf)
         self.send(['mess','\n \n \n      ---------------- \n      DEBUT DE LA PARTIE \n      ----------------\n'])
         self.log.emit('\n \n \n      ---------------- \n      DEBUT DE LA PARTIE \n      ----------------\n')
-        while True:
-            i = 1
-            for j in self.F.player:
-                try:
-                    if not(j.alive):
-                        raise Spellcancel
-                    other_pl = [y for y in self.F.player if y != j]
-                    j.restore_stamina()
-                    self.send(['mess',"\n \n >> C'est le tour de "+j.name+" << "])
-                    self.log.emit('Tour de '+j.name)
-                    strt_mss = self.rStartTour(j.name)
-                    self.log.emit(strt_mss)
-                    self.send(['turnof',j.name],other_pl)
-                    self.send(['mess',strt_mss])
-                    for typeR,obj in j.new_turn():
-                        if typeR == 'death':
-                            if(obj == j): #Si le joueur meurt de lui même
-                                self.send(['mess','Vous êtes mort au debut de votre tour'],[j])
-                                self.send(['mess', j.name+' est mort en commencant son tour'],other_pl)
-                                self.log.emit(j.name+' est mort en commencant son tour')
-                                j.alive = False #Juste pour être sûre xD
-                                break
-                            else:
-                                other_pl2 = other_pl.copy()
-                                other_pl.remove(obj)
-                                self.send(['mess',' Vous avez tué '+obj.name],[j])
-                                self.send(['mess',j.name+ ' vous a tué '],[obj])
-                                self.send(['mess',j.name+' a tué '+obj.name],other_pl2)
-                                self.log.emit(j.name+' a tué '+obj.name)
-                        elif typeR == 'mess':
-                            self.send(['mess',obj])
-                            self.log.emit(obj)
-                    cd = True
-                    self.send_param()
-                    while cd:
-                        self.send(['get_c','main'],[j])
-                        ms = self.get_rsp(j)
-                        if ms[0] == 'cmd':
-                            self.log.emit(str(ms[1]))
-                            cd = self.command(ms[1],j)
-                        self.send_param()
-                except: pass
+        self.turnnb = 1
+        self.start_tour()
+
+    def start_tour(self):
+        for j in self.F.player:
+            try:
+                if not(j.alive):
+                    raise Spellcancel
+                other_pl = [y for y in self.F.player if y != j]
+                j.restore_stamina()
+                for typeR,obj in j.new_turn():
+                    if typeR == 'death':
+                        if(obj == j): #Si le joueur meurt de lui même
+                            self.send(['mess','Vous êtes mort au debut de votre tour'],[j])
+                            self.send(['mess', j.name+' est mort en commencant son tour'],other_pl)
+                            self.log.emit(j.name+' est mort en commencant son tour')
+                            j.alive = False #Juste pour être sûre xD
+                            break
+                        else:
+                            other_pl2 = other_pl.copy()
+                            other_pl.remove(obj)
+                            self.send(['mess',' Vous avez tué '+obj.name],[j])
+                            self.send(['mess',j.name+ ' vous a tué '],[obj])
+                            self.send(['mess',j.name+' a tué '+obj.name],other_pl2)
+                            self.log.emit(j.name+' a tué '+obj.name)
+                    elif typeR == 'mess':
+                        self.send(['mess',obj])
+                        self.log.emit(obj)
+            except: pass
+        self.thinking = self.F.nb
+        self.spelllist = []
+        self.send(['mess','\n \n \n    --Actions du tour-- \n'])
+        for j in self.F.player:
+            th = Thread(target=self.command,args=(j,))
+            th.start()
+
+    def trispell(self):
+        t = []
+        for k in self.spelllist:
+            if k == []:
+                self.spelllist.remove(k)
+            for j in k:
+                if j[0] == 0:
+                    k.remove(j)
+                    t.append(j)
+        for k in range(len(self.spelllist)):
+            temp=self.spelllist[k].copy()
+            j=k
+            while j>0 and self.spelllist[j-1][0][0] > temp[0][0]:
+                self.spelllist[j]=self.spelllist[j-1].copy()
+                j-=1
+            self.spelllist[j]=temp
+        for k in self.spelllist:
+            t += k
+        self.spelllist = t
+    def validerspells(self,liste):
+        self.thinking -= 1
+        self.spelllist.append(liste)
+        if self.thinking == 0:
+            self.trispell()
+            self.processturn()
+    
+    def processturn(self):
+        self.send(['mess','\n \n     --DEBUT DE TOUR '+str(self.turnnb)+'--   \n \n'])
+        self.log.emit('\n \n     --DEBUT DE TOUR '+str(self.turnnb)+'--   \n \n')
+        self.send(['gametext','Tour '+str(self.turnnb)])
+        for s in self.spelllist:
+            try:
+                if not(s[2].alive):
+                    raise Spellcancel
+                self.send_param()
+                if len(s) == 3:
+                    toshow = s[1]()
+                elif len(s) == 4:
+                    toshow = s[1](s[3])
+                for typeR,obj in toshow:
+                    if typeR == 'death':
+                        other_pl = [p for p in self.F.player if p.id != s[2].id]
+                        if(obj == s[2]): #Si le joueur meurt de lui même
+                            self.send(['mess','Vous êtes mort en attaquant'],[s[2]])
+                            self.send(['mess', s[2].name+' est mort au combat'],other_pl)
+                            self.log.emit(s[2].name+' est mort au combat')
+                        else:
+                            other_pl2 = other_pl.copy()
+                            other_pl2.remove(obj)
+                            self.send(['mess',' Vous avez tué '+obj.name],[s[2]])
+                            self.send(['mess','Vous avez ete tue par '+s[2].name],[obj])
+                            self.send(['mess',s[2].name+' a tué '+obj.name],other_pl2)
+                            self.log.emit(s[2].name+' a tué '+obj.name)
+                    elif typeR == 'mess':
+                        self.log.emit(obj)
+                        self.send(['mess',obj])
+            except: pass
             self.send_param()
-            self.send(['mess','\n \n     --FIN DE TOUR '+str(i)+'--   \n \n'])
-            self.log.emit('\n \n     --FIN DE TOUR '+str(i)+'--   \n \n')
-            if( self.F.nb == 1):
-                self.send_param()
-                a = 'Fin de la partie, le gagnant est : '+[pl for pl in self.F.player if pl.alive == True][0].name
-                self.send(['end_game',a])
-                self.log.emit('Fin de partie')
-                app.processEvents()
-                QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE",a)
-                RPG.close()
-                sys.exit(0)
-            elif( self.F.nb == 0):
-                self.send_param()
-                a = 'Fin de la partie, le combat a été rude... Personne ne gagne ! '
-                self.send(['end_game',a])
-                self.log.emit('Fin de partie')
-                app.processEvents()
-                QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE",a)
-                RPG.close()
-                sys.exit(0)
-            i += 1
+        self.send(['mess','\n \n     --FIN DE TOUR '+str(self.turnnb)+'--   \n \n'])
+        self.log.emit('\n \n     --FIN DE TOUR '+str(self.turnnb)+'--   \n \n')
+        if( self.F.nb == 1):
+            self.send_param()
+            a = 'Fin de la partie, le gagnant est : '+[pl for pl in self.F.player if pl.alive == True][0].name
+            self.send(['end_game',a])
+            self.log.emit('Fin de partie')
+            app.processEvents()
+            QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE",a)
+            RPG.close()
+            sys.exit(0)
+        elif( self.F.nb == 0):
+            self.send_param()
+            a = 'Fin de la partie, le combat a été rude... Personne ne gagne ! '
+            self.send(['end_game',a])
+            self.log.emit('Fin de partie')
+            app.processEvents()
+            QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE",a)
+            RPG.close()
+            sys.exit(0)
+        self.turnnb += 1
+        self.start_tour()
 
 
 if __name__ == "__main__" :

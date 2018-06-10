@@ -90,7 +90,7 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>123</width>
+       <width>116</width>
        <height>23</height>
       </rect>
      </property>
@@ -505,6 +505,22 @@ p, li { white-space: pre-wrap; }
        <string>Démarrage de la partie...</string>
       </property>
      </widget>
+    </widget>
+    <widget class="QPushButton" name="cancelSpell">
+     <property name="geometry">
+      <rect>
+       <x>536</x>
+       <y>270</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: blue; color:orange;</string>
+     </property>
+     <property name="text">
+      <string>Annuler</string>
+     </property>
     </widget>
    </widget>
   </widget>

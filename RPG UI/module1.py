@@ -36,8 +36,11 @@ class MainWindow(Ui_RPG):
         self.Spellbuttons = []
         self.ipBOX.returnPressed.connect(self.connectButton.click)
         self.helpSpell.clicked.connect(self.showHelp)
+        self.cancelSpell.hide()
+        self.cancelSpell.clicked.connect(self.cancelSpellFct)
         self.endTour.hide()
         self.endTour.clicked.connect(self.endTourFct)
+        self.spellnb = 0
     def failwith(self,string):
         QtWidgets.QMessageBox.about(RPG, "Erreur", string)
         return False
@@ -45,10 +48,26 @@ class MainWindow(Ui_RPG):
         QtWidgets.QMessageBox.about(RPG, "Super !", string)
         return False
 
+    def cancelSpellFct(self):
+        if self.spellnb >= 1:
+            #supprimer la dernière ligne
+            self.gameLog.setFocus()
+            self.gameLog.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+            self.gameLog.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
+            self.gameLog.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.KeepAnchor)
+            self.gameLog.textCursor().removeSelectedText()
+            self.gameLog.textCursor().deletePreviousChar()
+            self.send_updt(['cmd','cancel'])
+            self.spellnb -= 1
+            self.cancelSpell.hide()
+            self.endTour.hide()
+            self.spells.setEnabled(False)
     def endTourFct(self):
         self.endTour.hide()
+        self.cancelSpell.hide()
         self.spells.setEnabled(False)
-        self.gameText.setText('Tour des autres joueurs...')
+        self.spellnb = 0
+        self.gameText.setText('Attente des autres joueurs...')
         self.send_updt(['cmd','fin'])
     def LaunchSpell(self):
         spellname = RPG.sender().text()
@@ -58,7 +77,6 @@ class MainWindow(Ui_RPG):
         if self.stamina.value() < self.mySpell[i][1]:
             return self.failwith('Pas assez d\'endurance')
         self.spells.setEnabled(False)
-        self.gameText.setText('Lancement de : '+spellname)
         self.send_updt(['cmd','spell '+spellname])
         app.processEvents()
 
@@ -111,25 +129,21 @@ class MainWindow(Ui_RPG):
             if a[1] == 'main':
                 self.spells.setEnabled(True)
                 self.endTour.show()
+                if self.spellnb >= 1:
+                    self.cancelSpell.show()
                 self.gameText.setText('A vous de jouer')
             elif a[1] == 'target':
                 self.send_updt(['name',self.pick(a[2])])
-        elif a[0] == 'turnof':
-            self.gameText.setText('Tour de '+a[1])
         elif a[0] == 'mess': #['alert','log']
             self.gameLog.append(a[1])
+        elif a[0] == 'spell':
+            self.gameLog.append(a[1])
+            self.spellnb += 1
+        elif a[0] == 'gametext':
+            self.gameText.setText(a[1])
         elif a[0] == 'field': #['alert','log']
             
-            if self.isDoneField:
-                if self.playList:
-                    up = a[1]
-                    for k in range(len(up)):
-                        #show field updates
-                        if self.playList[k][0] == up[k][0]:
-                            self.playList[k][2].setProperty("value",int(float(up[k][2])))
-                            print("set "+str(up[k][1])+" to "+str(up[k][2]))
-
-            else:
+            if not self.isDoneField:
                 #Setup Field
                 self.isDoneField = True
                 pl = a[1]
@@ -184,6 +198,14 @@ class MainWindow(Ui_RPG):
                     name.show()
                     b1.show()
                     self.playList.append([p2[k][0],b1,lifebar])
+            else:
+                if self.playList:
+                    up = a[1]
+                    for k in range(len(up)):
+                        #show field updates
+                        if self.playList[k][0] == up[k][0]:
+                            self.playList[k][2].setProperty("value",int(float(up[k][2])))
+                            print("set "+str(up[k][1])+" to "+str(up[k][2]))
         elif a[0] == 'end_game': #['alert','log']
             QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE", a[1])
             RPG.close()
@@ -243,7 +265,7 @@ class MainWindow(Ui_RPG):
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)                
                 s.sendto(pickle.dumps("Anyone?"), ('<broadcast>', int(self.comboBox.currentText())))
-                recv_data, addr = s.recvfrom(1024)
+                _unused, addr = s.recvfrom(1024)
                 ip = addr[0]
                 port = 4392
                 time.sleep(.3)

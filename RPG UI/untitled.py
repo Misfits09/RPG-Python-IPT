@@ -40,7 +40,7 @@ class Ui_RPG(object):
         self.playeGui.setFrameShadow(QtWidgets.QFrame.Raised)
         self.playeGui.setObjectName("playeGui")
         self.HP = QtWidgets.QProgressBar(self.playeGui)
-        self.HP.setGeometry(QtCore.QRect(10, 20, 123, 23))
+        self.HP.setGeometry(QtCore.QRect(10, 20, 116, 23))
         self.HP.setStyleSheet("background: rgba(1,1,1,.7); color:white;")
         self.HP.setMaximum(200)
         self.HP.setProperty("value", 122)
@@ -171,6 +171,10 @@ class Ui_RPG(object):
         self.gameText.setGeometry(QtCore.QRect(0, 0, 411, 31))
         self.gameText.setStyleSheet("background: none; text-decoration: underline;font-size:10pt; font-weight:600;")
         self.gameText.setObjectName("gameText")
+        self.cancelSpell = QtWidgets.QPushButton(self.gameFrame)
+        self.cancelSpell.setGeometry(QtCore.QRect(536, 270, 75, 23))
+        self.cancelSpell.setStyleSheet("background: blue; color:orange;")
+        self.cancelSpell.setObjectName("cancelSpell")
         RPG.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(RPG)
@@ -199,4 +203,5 @@ class Ui_RPG(object):
         self.comboBox.setItemText(2, _translate("RPG", "7289"))
         self.helpSpell.setText(_translate("RPG", "?"))
         self.gameText.setText(_translate("RPG", "Démarrage de la partie..."))
+        self.cancelSpell.setText(_translate("RPG", "Annuler"))
 
