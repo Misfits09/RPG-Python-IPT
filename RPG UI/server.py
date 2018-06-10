@@ -270,6 +270,7 @@ class MainWindow(Ui_Server):
                     elif typeR == 'mess':
                         self.send(['mess',obj])
                         self.log.emit(obj)
+                self.send_param()
             except: pass
         self.thinking = self.F.nb
         self.spelllist = []
@@ -280,6 +281,7 @@ class MainWindow(Ui_Server):
 
     def trispell(self):
         t = []
+        t2 = []
         for k in self.spelllist:
             if k == []:
                 self.spelllist.remove(k)
@@ -287,6 +289,9 @@ class MainWindow(Ui_Server):
                 if j[0] == 0:
                     k.remove(j)
                     t.append(j)
+                if j[0] == 1:
+                    k.remove(j)
+                    t2.append(j)
         for k in range(len(self.spelllist)):
             temp=self.spelllist[k].copy()
             j=k
@@ -296,7 +301,7 @@ class MainWindow(Ui_Server):
             self.spelllist[j]=temp
         for k in self.spelllist:
             t += k
-        self.spelllist = t
+        self.spelllist = t + t2
     def validerspells(self,liste):
         self.thinking -= 1
         self.spelllist.append(liste)
