@@ -24,7 +24,7 @@ class field():
     def getTable(self):
         terrain=[]
         for j in self.player:
-            terrain.append([str(j.id),j.name,j.classname,str(j.hp),str(j.stamina)])
+            terrain.append([str(j.id),j.name,j.classname,str(j.hp),str(j.stamina),j.pvMAX])
         return terrain
 
 class joueur():

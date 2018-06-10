@@ -9,6 +9,7 @@ class com(QtCore.QThread):
     def __init__(self,get_up):
         QtCore.QThread.__init__(self)
         self.com = get_up
+        
     
         
     def __del__(self):
@@ -21,6 +22,7 @@ class com(QtCore.QThread):
 class MainWindow(Ui_RPG):
     valideClasses = ['guerrier','ninja','mage blanc','barbare','lancier',"yolosaruken"]
     def __init__(self, frame):
+        self.isDoneField = False
         self.setupUi(frame)
         self.gameFrame.hide()
         self.playeGui.hide()
@@ -117,11 +119,71 @@ class MainWindow(Ui_RPG):
         elif a[0] == 'mess': #['alert','log']
             self.gameLog.append(a[1])
         elif a[0] == 'field': #['alert','log']
-            fieldStr = """<html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"><table border="0" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;width:100%" cellspacing="2" cellpadding="0"><tr><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Nom</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Classe</span><span style=" font-size:8pt;">     </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">PV</span><span style=" font-size:8pt;">    </span></p></td></tr>"""
-            for p in a[1]:
-                fieldStr += """<tr><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+p[0]+"""</span></p></td><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+p[1]+""" </span></p></td><td><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">"""+str(int(float(p[2])))+"""</span></p></td></tr>"""
-            fieldStr += "</table></body></html>"
-            self.fieldBOX.setText(fieldStr)
+            
+            if self.isDoneField:
+                if self.playList:
+                    up = a[1]
+                    for k in range(len(up)):
+                        #show field updates
+                        if self.playList[k][0] == up[k][0]:
+                            self.playList[k][2].setProperty("value",int(float(up[k][2])))
+                            print("set "+str(up[k][1])+" to "+str(up[k][2]))
+
+            else:
+                #Setup Field
+                self.isDoneField = True
+                pl = a[1]
+                self.playList = []
+                l  = len(pl)
+                p1,p2 = pl[:(l//2)],pl[(l//2):]
+                lp1,lp2 = len(p1),len(p2)
+                import os
+                for k in range(lp1):
+                    print('creating : '+str(p1[k]))
+                    a1=QtWidgets.QFrame(self.gameBOX)
+                    a1.setObjectName(p1[k][1])
+                    a1.setGeometry(QtCore.QRect((400/lp1)*k,0,(400/lp1)*(k+1),145))
+                    pic = QtWidgets.QLabel(a1)
+                    pic.setGeometry(QtCore.QRect((200/lp1)-62.5, 20, 400/lp1, 145))
+                    #use full ABSOLUTE path to the image, not relative
+                    pic.setPixmap(QtGui.QPixmap(os.getcwd() + "/image/"+str(p1[k][1])+".png"))
+                    lifebar = QtWidgets.QProgressBar(a1)
+                    lifebar.setGeometry(QtCore.QRect(0,22,(400/lp1) - 10,22))
+                    lifebar.setMaximum(p1[k][3])
+                    lifebar.setFormat("%v/%m")
+                    lifebar.setProperty("value",p1[k][2])
+                    name = QtWidgets.QLabel(a1)
+                    name.setGeometry(QtCore.QRect(0,0,400/lp1,20))
+                    name.setText(p1[k][0])
+                    name.setStyleSheet('text-align:center; vertical-align: top; color:white;text-decoration:bold;border: 2px white;')
+                    name.setAlignment(QtCore.Qt.AlignCenter)
+                    pic.show()
+                    name.show()
+                    a1.show()
+                    self.playList.append([p1[k][0],a1,lifebar])
+                for k in range(lp2):
+                    print('creating2 : '+str(p2[k]))
+                    b1=QtWidgets.QFrame(self.gameBOX)
+                    b1.setObjectName(p2[k][1])
+                    b1.setGeometry(QtCore.QRect((400/lp2)*k,145,(400/lp2)*(k+1),290))
+                    pic = QtWidgets.QLabel(b1)
+                    pic.setGeometry(QtCore.QRect((200/lp2)-62.5, 20, 400/lp2, 145))
+                    #use full ABSOLUTE path to the image, not relative
+                    pic.setPixmap(QtGui.QPixmap(os.getcwd() + "/image/"+str(p2[k][1])+".png"))
+                    lifebar = QtWidgets.QProgressBar(b1)
+                    lifebar.setGeometry(QtCore.QRect(0,22,(400/lp2)-10,22))
+                    lifebar.setMaximum(p2[k][3])
+                    lifebar.setFormat("%v/%m")
+                    lifebar.setProperty("value",p2[k][2])
+                    name = QtWidgets.QLabel(b1)
+                    name.setGeometry(QtCore.QRect(0,0,400/lp2,20))
+                    name.setText(p2[k][0])
+                    name.setStyleSheet('text-align:center; vertical-align: top; color:white; text-decoration:bold;border: 2px white;')
+                    name.setAlignment(QtCore.Qt.AlignCenter)
+                    pic.show()
+                    name.show()
+                    b1.show()
+                    self.playList.append([p2[k][0],b1,lifebar])
         elif a[0] == 'end_game': #['alert','log']
             QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE", a[1])
             RPG.close()

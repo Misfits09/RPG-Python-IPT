@@ -206,7 +206,7 @@ class MainWindow(Ui_Server):
         rint = random.randint(0,len(l1)-1)
         return l1[rint].replace('*namej*',name)
     def send_param(self):    
-        self.send(['field',[(p[1],p[2],p[3]) for p in self.F.getTable()]])
+        self.send(['field',[(p[1],p[2],p[3],p[5]) for p in self.F.getTable()]])
         self.table =self.F.getTable()
         self.signals.fld_updt.emit()
         for k in self.F.player:
