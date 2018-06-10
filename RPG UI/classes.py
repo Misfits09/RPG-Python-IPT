@@ -243,11 +243,11 @@ class guerrier(joueur):
     
     #prendre une attaque à la place de la cible (targettrigger sur cible)
     def protect (self):
+        if self.stamina < 30 :
+            return [('mess', self.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         try : pl = findtarget(self)
         except Empty_fld : return [('mess','Aucune cible disponible')]
         except Spellcancel : return []
-        if self.stamina < 30 :
-            return [('mess', self.name+' n\'a pas la force de protéger : Endurance à '+str(self.stamina))]
         self.stamina -= 30
         pl.trigger.addT(self.protection)
         return [('mess',self.name+' protège '+pl.name)]
@@ -284,7 +284,7 @@ class ninja(joueur):
     staminaMAX = 100
     pvMAX = 85
     speed = 150
-    help = [('hide',40, 'Se cache pendant un tour et ne peut plus attaquer'),
+    help = [('hide',50, 'Se cache pendant un tour et ne peut plus attaquer'),
             ('attack',att_cost,'Attaque physique de base'),
             ('esquive',35,'Esquive la prochaine attaque'),
             ('affutage',30,'Augmente légèrement les dégâtes infligés'),]
@@ -380,7 +380,7 @@ class mage_blanc(joueur):
     help = [('soin',30,'Soigne la cible de 25 PV'),
             ('reborn',100,'Fait renaitre un joueur mort avec la moitié de sa vie'),
             ('godshield',100,'Bouclier invulnérable d\'un tour sur une cible (Un tour de delai)'),
-            ('attack',25,'Lance une faible attaque magique sur la cible')]
+            ('attack',att_cost,'Lance une faible attaque magique sur la cible')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
         self.hasDoneGS = False
@@ -411,13 +411,13 @@ class mage_blanc(joueur):
         return [('mess', self.name + ' attaque '+ target.name )] + self.attack_target(target,self.ad,'magique')
     
     def godshield(self):
-        try : tg = findtarget(self)
-        except Empty_fld : return [('mess','Aucune cible disponible')]
-        except Spellcancel : return []
         if self.stamina <  100:
             return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour canaliser un bouclier divin : '+str(self.stamina))]
         elif self.hasDoneGS:
             return [('mess',self.name + ' ne peut pas canaliser un nouveau bouclier divin ')]
+        try : tg = findtarget(self)
+        except Empty_fld : return [('mess','Aucune cible disponible')]
+        except Spellcancel : return []
         self.stamina -= 100
         tg.trigger.addT(self.isGodShielded)
         self.trigger.addTrRes(0,self.remGodShield)
@@ -437,11 +437,11 @@ class mage_blanc(joueur):
         return []
 
     def reborn(self):
+        if self.stamina <  100:
+            return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         try : pl = findtarget(self,False)
         except Empty_fld : return [('mess','Aucune cible disponible')]
         except Spellcancel : return []
-        if self.stamina <  100:
-            return [('mess',self.name + ' n\' a pas l\'énergie suffisante pour réanimer : '+str(self.stamina))]
         self.stamina -= 100
         pl.alive = True
         pl.hp = int(pl.pvMAX/2)
@@ -545,9 +545,9 @@ class yolosaruken(joueur):
     pvMAX = 100
     speed = 100
     help = [('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
-            ('healmate',95,'Soin de 100PV de soi et d\'un allié aléatoire'),
-            ('exodia',95,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
-            ('MembresExodia',85,'Multiplie par 10 les chances du sort "Exodia"'),
+            ('healmate',100,'Soin de 100PV de soi et d\'un allié aléatoire'),
+            ('exodia',100,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
+            ('DisciplesExodia',85,'Multiplie par 10 les chances du sort "Exodia"'),
             ('SurpriseMthrFcker',35,'Choisi une cible aléatoire et soit la soigne de 50 PV (50%) soit l\'attaque de 50 (50%)')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
@@ -634,9 +634,7 @@ class yolosaruken(joueur):
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        return {'attack':self.attack , 'healmate':self.healmate, 'exodia':self.exodia, 'MembresExodia':self.membresExo, 'SurpriseMthrFcker':self.suprisemothfcker}[nomduspell]()
-
-
+        return {'attack':self.attack , 'healmate':self.healmate, 'exodia':self.exodia, 'DisciplesExodia':self.membresExo, 'SurpriseMthrFcker':self.suprisemothfcker}[nomduspell]()
 
 class barde(joueur):
     classname = 'barde'
@@ -668,13 +666,15 @@ class lancier(joueur):
     dodge = 0
     armor = .20
     resistance = .10
-    ad = 40
+    ad = 20
     att_cost = 30
     staminaMAX = 100
     pvMAX = 125
     speed = 60
     help = [('attack',att_cost,'attaque de base'),
-            ('jump',40,'saute en l\'air et retombe au tour suivant sur la cible ')]
+            ('jump',40,'saute en l\'air et retombe au tour suivant sur la cible '),
+            ('ProPecTorat',40,'Donne un bouclier qui protege d\'une attaque'),
+            ('Passif',0,'Ensemble c\'est plus mieux : pv max + 50 si deux lanciers dans la partie')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
         self.hp = self.pvMAX
@@ -696,11 +696,11 @@ class lancier(joueur):
 
     #saut
     def jump(self):
+        if self.stamina < 40:
+            return [('mess', self.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         try : self.jumptarget = findtarget(self)
         except Empty_fld : return [('mess','Aucune cible disponible')]
         except Spellcancel : return []
-        if self.stamina < 40:
-            return [('mess', self.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         self.stamina = 0
         self.lastTurnJump = True
         self.trigger.addT(self.jumping)
@@ -718,9 +718,32 @@ class lancier(joueur):
         self.trigger.remTrRes(self.canjump)
         return []
     
+    def ProPecTorat(self):
+        if self.stamina < 40:
+            return [('mess', self.name+' n\' a pas la force de se protéger : Endurance à '+str(self.stamina))]
+        else:
+            self.stamina -= 40
+        self.trigger.addT(self.shielding)
+        return [('mess',self.name+' bombe le torse et une barriere apparait autour de lui')]
+    def shielding(self,source,target,amount,dtype):
+        self.trigger.remT(self.shielding)
+        return True,[('mess','La barriere de '+self.name + ' le protege de l\'attaque ! ')]
+    
+    def passif(self):
+        return [('mess','Le passif n\'est pas activable')]
+    
+    #Override set_field pour le passif
+    def set_field(self,fi):
+        self.F = fi
+        for pl in fi.player:
+            if pl.id != self.id and pl.classname == 'lancier':
+                self.pvMAX = 175
+                self.hp = 175
+                break
+    
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        return {'attack':self.attack , 'jump':self.jump}[nomduspell]()
+        return {'attack':self.attack , 'jump':self.jump , 'ProPecTorat':self.ProPecTorat,'passif':self.passif}[nomduspell]()
 
 classes = [guerrier,ninja,mage_blanc,barbare,lancier,yolosaruken]
