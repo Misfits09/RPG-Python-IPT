@@ -164,12 +164,12 @@ class Ui_RPG(object):
         self.helpSpell.setStyleSheet("background: green; color:white")
         self.helpSpell.setObjectName("helpSpell")
         self.gameBOX = QtWidgets.QFrame(self.gameFrame)
-        self.gameBOX.setObjectName('gameBOX')
-        self.gameBOX.setGeometry(QtCore.QRect(0,0,400,290))
-        self.gameBOX.setStyleSheet("background: none; color:white")
+        self.gameBOX.setGeometry(QtCore.QRect(0, 0, 400, 290))
+        self.gameBOX.setStyleSheet("background: none; color: white")
+        self.gameBOX.setObjectName("gameBOX")
         self.gameText = QtWidgets.QLabel(self.gameBOX)
         self.gameText.setGeometry(QtCore.QRect(0, 0, 411, 31))
-        self.gameText.setStyleSheet("background: none")
+        self.gameText.setStyleSheet("background: none; text-decoration: underline;font-size:10pt; font-weight:600;")
         self.gameText.setObjectName("gameText")
         RPG.setCentralWidget(self.centralwidget)
 
@@ -199,5 +199,4 @@ class Ui_RPG(object):
         self.comboBox.setItemText(2, _translate("RPG", "7289"))
         self.helpSpell.setText(_translate("RPG", "?"))
         self.gameText.setText(_translate("RPG", "Démarrage de la partie..."))
-        self.gameText.setStyleSheet("text-decoration: underline;font-size:10pt; font-weight:600;")
 
