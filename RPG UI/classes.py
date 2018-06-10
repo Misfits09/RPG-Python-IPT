@@ -157,7 +157,7 @@ def findtarget(j,alive = True):
         raise Empty_fld
     while True:
         sendc(['get_c','target',namelist ],j)
-        useless,name = get_rspc(j)
+        _unused,name = get_rspc(j)
         if name == 'cancel':
             raise Spellcancel
         plFound = False
@@ -285,6 +285,8 @@ class guerrier(joueur):
                 raise NoStamina
             pl = findtarget(self)
             return (1/self.speed,self.attack,self,pl)
+        else:
+            raise Spellerror
         
     #attaque de base
     def attack(self,target):
@@ -395,6 +397,8 @@ class ninja(joueur):
                 raise NoStamina
             self.stamina -= 30
             return (1/self.speed,self.affutage,self)
+        else:
+            raise Spellerror
     def classestr(self):
         return 'Maître Ninja '+self.name+' a '+str(self.hp)+' PV, et un entrainement aux arts martiaux !'
 
@@ -517,6 +521,8 @@ class mage_blanc(joueur):
             self.stamina -= self.att_cost
             target = findtarget(self)
             return (1/self.speed,self.attack,self,target)
+        else:
+            raise Spellerror
         
     def classestr(self):
         return 'Mage Blanc '+self.name+' a '+str(self.hp)+' PV, et fait le bien autour de lui !'        
@@ -603,7 +609,7 @@ class barbare(joueur):
                 raise NoStamina
             self.stamina -= 40
             return (0,self.double_tranchant,self)
-        elif nomduspell == 'passif':
+        else:
             raise Spellerror
         
 class yolosaruken(joueur):
@@ -732,7 +738,8 @@ class yolosaruken(joueur):
                 raise NoStamina
             self.stamina -= 35
             return (1/self.speed,self.suprisemothfcker,self)
-        return {'attack':self.attack , 'healmate':self.healmate, 'exodia':self.exodia, 'DisciplesExodia':self.membresExo, 'SurpriseMthrFcker':self.suprisemothfcker}[nomduspell]()
+        else:
+            raise Spellerror
 
 class barde(joueur):
     classname = 'barde'
@@ -855,10 +862,14 @@ class lancier(joueur):
             self.stamina -= 40
             return (0,self.ProPecTorat,self)
         elif nomduspell == 'jump':
+            if self.lastTurnJump:
+                raise Spellerror
             if self.stamina < 40 :
                 raise NoStamina
             self.stamina -= 40
             target = findtarget(self)
             return (1/self.speed,self.jump,self,target)
+        else:
+            raise Spellerror
 
 classes = [guerrier,ninja,mage_blanc,barbare,lancier,yolosaruken]

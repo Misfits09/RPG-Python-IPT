@@ -164,7 +164,6 @@ class MainWindow(Ui_Server):
                 elif(al[0] == 'spell'):
                     try:
                         toshow = j.spell(al[1],self.F)
-                        self.log.emit(str(toshow))
                         if len(toshow) == 3:
                             self.send(['spell',al[1]],[j])
                         elif len(toshow) == 4:

@@ -153,7 +153,6 @@ class MainWindow(Ui_RPG):
                 lp1,lp2 = len(p1),len(p2)
                 import os
                 for k in range(lp1):
-                    print('creating : '+str(p1[k]))
                     a1=QtWidgets.QFrame(self.gameBOX)
                     a1.setObjectName(p1[k][1])
                     a1.setGeometry(QtCore.QRect((400/lp1)*k,0,(400/lp1)*(k+1),145))
@@ -176,7 +175,6 @@ class MainWindow(Ui_RPG):
                     a1.show()
                     self.playList.append([p1[k][0],a1,lifebar])
                 for k in range(lp2):
-                    print('creating2 : '+str(p2[k]))
                     b1=QtWidgets.QFrame(self.gameBOX)
                     b1.setObjectName(p2[k][1])
                     b1.setGeometry(QtCore.QRect((400/lp2)*k,145,(400/lp2)*(k+1),290))
@@ -205,7 +203,6 @@ class MainWindow(Ui_RPG):
                         #show field updates
                         if self.playList[k][0] == up[k][0]:
                             self.playList[k][2].setProperty("value",int(float(up[k][2])))
-                            print("set "+str(up[k][1])+" to "+str(up[k][2]))
         elif a[0] == 'end_game': #['alert','log']
             QtWidgets.QMessageBox.about(RPG, "FIN DE PARTIE", a[1])
             RPG.close()
