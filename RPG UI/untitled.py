@@ -250,14 +250,3 @@ class Ui_RPG(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt;\">Messages : </span></p></body></html>"))
         self.chatLabel.setText(_translate("RPG", "<html><head/><body align = \"center\"><p>Chat</p></body></html>"))
         self.chatButton.setText(_translate("RPG", "Envoi"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    RPG = QtWidgets.QMainWindow()
-    ui = Ui_RPG()
-    ui.setupUi(RPG)
-    RPG.show()
-    sys.exit(app.exec_())
-
