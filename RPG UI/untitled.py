@@ -11,9 +11,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_RPG(object):
     def setupUi(self, RPG):
         RPG.setObjectName("RPG")
-        RPG.resize(640, 480)
-        RPG.setMinimumSize(QtCore.QSize(640, 480))
-        RPG.setMaximumSize(QtCore.QSize(640, 480))
+        RPG.resize(890, 480)
+        RPG.setMinimumSize(QtCore.QSize(890, 480))
+        RPG.setMaximumSize(QtCore.QSize(890, 480))
         font = QtGui.QFont()
         font.setFamily("OpenSymbol")
         RPG.setFont(font)
@@ -94,7 +94,7 @@ class Ui_RPG(object):
         font.setBold(True)
         font.setWeight(75)
         self.entete.setFont(font)
-        self.entete.setStyleSheet("background:rgba(1,1,1,.8);color:white; margin: 5")
+        self.entete.setStyleSheet("background:rgba(1,1,1,.8);color:white; margin: 5; text-align:center;")
         self.entete.setObjectName("entete")
         self.labelIP = QtWidgets.QLabel(self.setupFrame)
         self.labelIP.setGeometry(QtCore.QRect(300, 80, 28, 31))
@@ -175,6 +175,45 @@ class Ui_RPG(object):
         self.cancelSpell.setGeometry(QtCore.QRect(536, 270, 75, 23))
         self.cancelSpell.setStyleSheet("background: blue; color:orange;")
         self.cancelSpell.setObjectName("cancelSpell")
+        self.chatFrame = QtWidgets.QFrame(self.centralwidget)
+        self.chatFrame.setEnabled(True)
+        self.chatFrame.setGeometry(QtCore.QRect(640, 0, 251, 481))
+        self.chatFrame.setAutoFillBackground(False)
+        self.chatFrame.setStyleSheet("background:url(./tel2.jpg); color: white")
+        self.chatFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.chatFrame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.chatFrame.setObjectName("chatFrame")
+        self.chatLog = QtWidgets.QTextBrowser(self.chatFrame)
+        self.chatLog.setGeometry(QtCore.QRect(10, 40, 231, 391))
+        font = QtGui.QFont()
+        font.setFamily("MV Boli")
+        font.setPointSize(10)
+        font.setStrikeOut(False)
+        self.chatLog.setFont(font)
+        self.chatLog.setStyleSheet("color:white;\n"
+"background-color: rgba(112,112,112,.5);")
+        self.chatLog.setObjectName("chatLog")
+        self.chatLabel = QtWidgets.QLabel(self.chatFrame)
+        self.chatLabel.setGeometry(QtCore.QRect(10, 10, 231, 31))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setUnderline(False)
+        font.setWeight(75)
+        self.chatLabel.setFont(font)
+        self.chatLabel.setStyleSheet("background: none;font-size:10pt; font-weight:600;")
+        self.chatLabel.setObjectName("chatLabel")
+        self.chatButton = QtWidgets.QPushButton(self.chatFrame)
+        self.chatButton.setGeometry(QtCore.QRect(200, 440, 41, 24))
+        self.chatButton.setStyleSheet("border: 2px;\n"
+"border-color: rgb(255, 255, 255);\n"
+"background-color: rgba(112,112,112,.5);")
+        self.chatButton.setObjectName("chatButton")
+        self.chatBox = QtWidgets.QLineEdit(self.chatFrame)
+        self.chatBox.setGeometry(QtCore.QRect(10, 440, 181, 24))
+        self.chatBox.setStyleSheet("border:0px;\n"
+"background-color: rgba(112,112,112,.5);")
+        self.chatBox.setObjectName("chatBox")
         RPG.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(RPG)
@@ -204,4 +243,21 @@ class Ui_RPG(object):
         self.helpSpell.setText(_translate("RPG", "?"))
         self.gameText.setText(_translate("RPG", "Démarrage de la partie..."))
         self.cancelSpell.setText(_translate("RPG", "Annuler"))
+        self.chatLog.setHtml(_translate("RPG", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'MV Boli\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt;\">Messages : </span></p></body></html>"))
+        self.chatLabel.setText(_translate("RPG", "<html><head/><body align = \"center\"><p>Chat</p></body></html>"))
+        self.chatButton.setText(_translate("RPG", "Envoi"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    RPG = QtWidgets.QMainWindow()
+    ui = Ui_RPG()
+    ui.setupUi(RPG)
+    RPG.show()
+    sys.exit(app.exec_())
 

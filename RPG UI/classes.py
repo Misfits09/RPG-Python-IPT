@@ -32,11 +32,12 @@ class field():
         return terrain
 
 class joueur():
-    def __init__(self,i,sk): 
+    def __init__(self,i,sk,csk): 
         self.id,self.name = i,str(i)
         self.alive = True
         self.F = None
         self.socket = sk
+        self.chatsocket = csk
         self.trigger = triggers()
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
@@ -228,8 +229,8 @@ class guerrier(joueur):
             ('attack',att_cost,'attaque de base')]
     def classestr(self):
         return 'Guerrier '+self.name+' a '+str(self.hp)+' PV, une armure moyenne et un bon bouclier !'
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.protecting = None
 
     #bloquer la prochaine attaque (dmgtrigger sur soi)
@@ -316,8 +317,8 @@ class ninja(joueur):
             ('esquive',35,'Esquive la prochaine attaque'),
             ('affutage',30,'Augmente légèrement les dégâtes infligés'),]
 
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.lastTurnHide = False
         self.ad = self.base_ad
 
@@ -429,8 +430,8 @@ class mage_blanc(joueur):
             ('reborn',100,'Fait renaitre un joueur mort avec la moitié de sa vie'),
             ('godshield',100,'Bouclier invulnérable d\'un tour sur une cible (Un tour de delai)'),
             ('attack',att_cost,'Lance une faible attaque magique sur la cible')]
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.hasDoneGS = False
 
     def soin(self,tg):
@@ -538,8 +539,8 @@ class barbare(joueur):
     help = [('passif',0,'le barbare augmente passivement sa force s\'il est frappé'),
             ('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
             ('all_in',40,'augmente l\'attaque au prix de la défense ')]
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.ad = self.basead
         self.armor = self.basearmor
         self.resistance = self.baseresistance
@@ -623,8 +624,8 @@ class yolosaruken(joueur):
             ('exodia',100,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
             ('DisciplesExodia',85,'Multiplie par 10 les chances du sort "Exodia"'),
             ('SurpriseMthrFcker',35,'Choisi une cible aléatoire et soit la soigne de 50 PV (50%) soit l\'attaque de 50 (50%)')]
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.exodia_multiplier = 0
 
     def classestr(self):
@@ -773,8 +774,8 @@ class lancier(joueur):
             ('jump',40,'saute en l\'air et retombe au tour suivant sur la cible '),
             ('ProPecTorat',40,'Donne un bouclier qui protege d\'une attaque'),
             ('Passif',0,'Ensemble c\'est plus mieux : pv max + 50 si deux lanciers dans la partie')]
-    def __init__(self,i,sk):
-        super().__init__(i,sk)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.lastTurnJump = False
     def classestr(self):
         return 'Lancier '+self.name+' a '+str(self.hp)+' PV, une lance et saute très haut'

@@ -35,6 +35,14 @@ class MainWindow(Ui_Server):
             return a
         except:
             return ['error',0]
+    def chat(self):
+        while True:
+            for pl in self.F.player:
+                try:
+                    mss = pickle.loads(pl.chatsocket.recv(1024))
+                    self.log.emit(pl.name+' : '+mss)
+                    self.send(['chat',pl.name+' : '+mss])
+                except:pass
     
     def __init__(self,frame):
         self.setupUi(frame)
@@ -91,10 +99,13 @@ class MainWindow(Ui_Server):
             while not self.event.is_set():
                 try : 
                     sock,_unused = s.accept()
-                    t = Thread(target=self.get_infos,args=(i,sock))
+                    sock2,_unused = s.accept()
+                    sock2.settimeout(.2)
+                    t = Thread(target=self.get_infos,args=(i,sock,sock2))
                     t.start()
                     i += 1
                 except socket.timeout : pass
+        return None
     def search_ssip(self):
         connections = 0
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s2, socket.socket() as s:
@@ -110,12 +121,15 @@ class MainWindow(Ui_Server):
                     _unused, address = s2.recvfrom(1024)
                     connections += 1
                     s2.sendto(pickle.dumps("Hi there"),address)
-                    sock,address = s.accept()
-                    th = Thread(target=self.get_infos,args=(connections,sock))
+                    sock,_unused = s.accept()
+                    sock2,_unused = s.accept()
+                    sock2.settimeout(.2)
+                    th = Thread(target=self.get_infos,args=(connections,sock,sock2))
                     th.start()
                 except socket.timeout: pass
+        return None
 
-    def get_infos(self,i,sock):
+    def get_infos(self,i,sock,sock2):
         self.log.emit("Joueur "+str(i)+" arrivé et enregistré !!")
         mss = pickle.loads(sock.recv(1024))
         if mss[0] == "get_infos":
@@ -128,16 +142,16 @@ class MainWindow(Ui_Server):
             try:
                 for cl in classes:
                     if mss[2] == cl.classname:
-                        j = cl(i,sock)
+                        j = cl(i,sock,sock2)
                         j.name = name
                         self.log.emit('Classe recue : \''+mss[2]+'\' par joueur '+str(i))
                         break
                 else:
-                    j = guerrier(i,sock)
+                    j = guerrier(i,sock,sock2)
                     j.name = name
                     self.log.emit('Joueur '+str(i)+' guerrier par defaut : ERRCLSS1')
             except:
-                j = guerrier(i,sock)
+                j = guerrier(i,sock,sock2)
                 j.name = name
                 self.log.emit('Joueur '+str(i)+' guerrier par defaut : ERRCLSS2')
             self.plock.acquire()
@@ -145,6 +159,7 @@ class MainWindow(Ui_Server):
             self.table.append([str(j.id),j.name,j.classname,str(j.hp),str(j.stamina)])
             self.plock.release()
             self.signals.fld_updt.emit()
+            return None
     
     def command(self,j): #gestion des commandes pendant un tour
         sotstamina = j.stamina
@@ -182,6 +197,7 @@ class MainWindow(Ui_Server):
         j.stamina = sotstamina
         self.send_param()
         self.signals.spell_end.emit(spelllist)
+        return None
         
     def printfld(self):
         fieldStr = """<html><head><meta name="qrichtext" content="1" /><style type="text/css">p, li { white-space: pre-wrap; }</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;"><table border="0" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;width:100%" cellspacing="2" cellpadding="0"><tr><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">ID</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Nom</span><span style=" font-size:8pt;">    </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Classe</span><span style=" font-size:8pt;">     </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">PV</span><span style=" font-size:8pt;">    </span></p></td> </span></p></td><td><p align="center" style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt; font-weight:600;">Stamina</span><span style=" font-size:8pt;">    </span></p></td> </tr>"""
@@ -226,6 +242,8 @@ class MainWindow(Ui_Server):
     def start_game(self):
         self.event.set()
         self.F = field(self.players)
+        th= Thread(target=self.chat)
+        th.start()
         app.processEvents()
         for j in self.F.player:
             self.send(['setSpell',j.help],[j])
@@ -273,12 +291,11 @@ class MainWindow(Ui_Server):
                         self.log.emit(obj)
                     elif typeR == 'spell':
                         spells.append(obj)
-                        self.log.emit(str(self.spelllist))
                 self.send_param()
                 self.spelllist.append(spells)
             except: pass
         self.thinking = self.F.nb
-        self.send(['mess','\n \n \n    --Actions du tour-- \n'])
+        self.send(['mess','\n \n \n    --Actions du tour-- '])
         for j in self.F.player:
             th = Thread(target=self.command,args=(j,))
             th.start()
@@ -302,17 +319,10 @@ class MainWindow(Ui_Server):
         for k in range(1,len(self.spelllist)):
             temp=self.spelllist[k].copy()
             j=k
-            while j>0 :
-                if self.spelllist[j-1][0][0] < temp[0][0]:
-                    self.spelllist[j]=temp
-                    break
-                elif self.spelllist[j-1][0][0] == temp[0][0]:
-                    rd = random.randint(0,1)
-                    self.spelllist[j-rd],self.spelllist[j-(1-rd)] = self.spelllist[j-1].copy(),temp
-                    break
-                else:
-                    self.spelllist[j]=self.spelllist[j-1].copy()
+            while j>0 and self.spelllist[j-1][0][0] > temp[0][0]:
+                self.spelllist[j]=self.spelllist[j-1].copy()
                 j-=1
+            self.spelllist[j] = temp
         for k in self.spelllist:
             t += k
         self.spelllist = t + t2

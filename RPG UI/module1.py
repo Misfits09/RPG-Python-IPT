@@ -34,6 +34,9 @@ class MainWindow(Ui_RPG):
             self.BoxClass.addItem(cl)
         self.connectButton.clicked.connect(self.getPseudo)
         self.Spellbuttons = []
+        self.chatBox.returnPressed.connect(self.chatButton.click)
+        self.chatButton.clicked.connect(self.sendchat)
+        self.chatButton.setEnabled(False)
         self.ipBOX.returnPressed.connect(self.connectButton.click)
         self.helpSpell.clicked.connect(self.showHelp)
         self.cancelSpell.hide()
@@ -139,6 +142,8 @@ class MainWindow(Ui_RPG):
         elif a[0] == 'spell':
             self.gameLog.append(a[1])
             self.spellnb += 1
+        elif a[0] == 'chat':
+            self.chatLog.append(a[1])
         elif a[0] == 'gametext':
             self.gameText.setText(a[1])
         elif a[0] == 'field': #['alert','log']
@@ -224,11 +229,13 @@ class MainWindow(Ui_RPG):
         def onGetConfirm(a):
             self.macom.commTrigger.disconnect()
             self.macom.commTrigger.connect(self.infiniteloop)
+            self.chatcom.start()
             confirm = a
             if(confirm[0] != "setSpell"):
                 self.connectButton.setText("Valider")
                 self.connectButton.setEnabled(True)
                 return self.failwith('Erreur communication')
+            self.chatButton.setEnabled(True)
             self.setSpell(confirm[1])
             self.setupFrame.hide()
             self.BoxClass.hide()
@@ -265,14 +272,17 @@ class MainWindow(Ui_RPG):
                 _unused, addr = s.recvfrom(1024)
                 ip = addr[0]
                 port = 4392
-                time.sleep(.3)
+                time.sleep(.1)
             else:
                 ip = self.ipBOX.text()
                 port = int(self.comboBox.currentText())
             s = socket.socket()
             s.connect((ip,port))
             self.socket = s
+            self.chatsocket = socket.socket()
+            self.chatsocket.connect((ip,port))
             self.macom = com(self.get_updt)
+            self.chatcom = com(self.get_chat)
         except:
             self.connectButton.setStyleSheet('background: white')
             self.connectButton.setEnabled(True)
@@ -294,10 +304,17 @@ class MainWindow(Ui_RPG):
         return up_r
     def send_updt(self,u):
         self.socket.send(pickle.dumps(u))
-        time.sleep(.5)
+        time.sleep(.1)
     def send_error(self,ider):
         self.send_updt(["error",ider])
 
+    #Fonctions chat
+    def sendchat(self):
+        self.chatsocket.send(pickle.dumps(self.chatBox.text()))
+        self.chatBox.clear()
+    def get_chat(self):
+        up_r = pickle.loads(self.chatsocket.recv(1024))
+        return up_r
     #Changement des valeurs
     def setParam(self,k):
         for a,b in k:
