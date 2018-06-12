@@ -45,6 +45,8 @@ class MainWindow(Ui_RPG):
         self.endTour.hide()
         self.endTour.clicked.connect(self.endTourFct)
         self.spellnb = 0
+        self.chatBox.setText("En attente de connection...")
+        self.chatBox.setEnabled(False)
     def failwith(self,string):
         QtWidgets.QMessageBox.about(RPG, "Erreur", string)
         return False
@@ -237,6 +239,9 @@ class MainWindow(Ui_RPG):
                 self.connectButton.setEnabled(True)
                 return self.failwith('Erreur communication')
             self.chatButton.setEnabled(True)
+            self.chatBox.setText("")
+            self.chatBox.setPlaceholderText("Tapez ici...")
+            self.chatBox.setEnabled(True)
             self.setSpell(confirm[1])
             self.setupFrame.hide()
             self.BoxClass.hide()
