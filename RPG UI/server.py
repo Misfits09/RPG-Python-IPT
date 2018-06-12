@@ -125,7 +125,7 @@ class MainWindow(Ui_Server):
             except:
                 name = 'SansNom'+str(i)
                 self.log.emit("Joueur "+str(i)+" sans nom")
-            if True:
+            try:
                 for cl in classes:
                     if mss[2] == cl.classname:
                         j = cl(i,sock)
@@ -136,7 +136,7 @@ class MainWindow(Ui_Server):
                     j = guerrier(i,sock)
                     j.name = name
                     self.log.emit('Joueur '+str(i)+' guerrier par defaut : ERRCLSS1')
-            else:
+            except:
                 j = guerrier(i,sock)
                 j.name = name
                 self.log.emit('Joueur '+str(i)+' guerrier par defaut : ERRCLSS2')
@@ -155,10 +155,9 @@ class MainWindow(Ui_Server):
             self.send(['get_c','main'],[j])
             ms = self.get_rsp(j)
             if ms[0] == 'cmd':
-                self.log.emit(str(ms[1]))
+                self.log.emit(j.name+' : '+str(ms[1]))
                 al = ms[1].strip().split()
                 if(al[0] == 'fin'):
-                    self.log.emit('    -'+j.name+'- A choisi ses actions')
                     self.send(['mess','Attente des autres joueurs...'],[j])
                     cd = False
                 elif(al[0] == 'spell'):
@@ -245,14 +244,17 @@ class MainWindow(Ui_Server):
         self.start_tour()
 
     def start_tour(self):
+        self.spelllist = []
         for j in self.F.player:
             try:
                 if not(j.alive):
                     raise Spellcancel
-                other_pl = [y for y in self.F.player if y != j]
                 j.restore_stamina()
+                j.turn_speed()
+                spells = []
                 for typeR,obj in j.new_turn():
                     if typeR == 'death':
+                        other_pl = [y for y in self.F.player if y != j]
                         if(obj == j): #Si le joueur meurt de lui même
                             self.send(['mess','Vous êtes mort au debut de votre tour'],[j])
                             self.send(['mess', j.name+' est mort en commencant son tour'],other_pl)
@@ -269,10 +271,13 @@ class MainWindow(Ui_Server):
                     elif typeR == 'mess':
                         self.send(['mess',obj])
                         self.log.emit(obj)
+                    elif typeR == 'spell':
+                        spells.append(obj)
+                        self.log.emit(str(self.spelllist))
                 self.send_param()
+                self.spelllist.append(spells)
             except: pass
         self.thinking = self.F.nb
-        self.spelllist = []
         self.send(['mess','\n \n \n    --Actions du tour-- \n'])
         for j in self.F.player:
             th = Thread(target=self.command,args=(j,))
@@ -282,22 +287,32 @@ class MainWindow(Ui_Server):
         t = []
         t2 = []
         for k in self.spelllist:
-            if k == []:
-                self.spelllist.remove(k)
-            for j in k:
-                if j[0] == 0:
-                    k.remove(j)
-                    t.append(j)
-                if j[0] == 1:
-                    k.remove(j)
-                    t2.append(j)
-        for k in range(len(self.spelllist)):
+            j = 0
+            while j < len(k):
+                if k[j][0] == 0:
+                    t.append(k[j])
+                    k.remove(k[j])
+                elif k[j][0] == 1:
+                    t2.append(k[j])
+                    k.remove(k[j])
+                else:
+                    j += 1
+        while [] in self.spelllist:
+            self.spelllist.remove([])
+        for k in range(1,len(self.spelllist)):
             temp=self.spelllist[k].copy()
             j=k
-            while j>0 and self.spelllist[j-1][0][0] > temp[0][0]:
-                self.spelllist[j]=self.spelllist[j-1].copy()
+            while j>0 :
+                if self.spelllist[j-1][0][0] < temp[0][0]:
+                    self.spelllist[j]=temp
+                    break
+                elif self.spelllist[j-1][0][0] == temp[0][0]:
+                    rd = random.randint(0,1)
+                    self.spelllist[j-rd],self.spelllist[j-(1-rd)] = self.spelllist[j-1].copy(),temp
+                    break
+                else:
+                    self.spelllist[j]=self.spelllist[j-1].copy()
                 j-=1
-            self.spelllist[j]=temp
         for k in self.spelllist:
             t += k
         self.spelllist = t + t2

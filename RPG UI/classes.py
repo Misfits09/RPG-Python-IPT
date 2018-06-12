@@ -40,10 +40,15 @@ class joueur():
         self.trigger = triggers()
         self.trigger.addDmg(self.spikes)
         self.trigger.addT(self.dodgef)
+        self.hp = self.pvMAX
+        self.stamina = self.staminaMAX
+        self.speed = self.basespeed
     def set_field(self,fi):
         self.F = fi
     def restore_stamina(self):
         self.stamina = self.staminaMAX
+    def turn_speed(self):
+        self.speed = random.gauss(self.basespeed,self.basespeed/8)
     def __str__(self):
         if self.alive:
             return self.classestr()
@@ -217,7 +222,7 @@ class guerrier(joueur):
     att_cost = 30
     staminaMAX = 100
     pvMAX = 150
-    speed = 50
+    basespeed = 50
     help = [('block',40,'réduit les dégâts physiques pendant un tour'),
             ('protect',30,'encaisse les attaques à la place de la cible (un tour)'),
             ('attack',att_cost,'attaque de base')]
@@ -225,8 +230,6 @@ class guerrier(joueur):
         return 'Guerrier '+self.name+' a '+str(self.hp)+' PV, une armure moyenne et un bon bouclier !'
     def __init__(self,i,sk):
         super().__init__(i,sk)
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
         self.protecting = None
 
     #bloquer la prochaine attaque (dmgtrigger sur soi)
@@ -275,15 +278,14 @@ class guerrier(joueur):
         elif nomduspell == 'protect':
             if self.stamina < 30 :
                 raise NoStamina
-            self.stamina -= 30
             pl = findtarget(self)
+            self.stamina -= 30
             return (0,self.protect,self,pl)
         elif nomduspell == 'attack':
-            if(self.stamina >= self.att_cost):
-                self.stamina -= self.att_cost
-            else:
+            if(self.stamina < self.att_cost):
                 raise NoStamina
             pl = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,pl)
         else:
             raise Spellerror
@@ -308,7 +310,7 @@ class ninja(joueur):
     att_cost = 25
     staminaMAX = 100
     pvMAX = 85
-    speed = 150
+    basespeed = 150
     help = [('hide',50, 'Se cache pendant un tour et ne peut plus attaquer'),
             ('attack',att_cost,'Attaque physique de base'),
             ('esquive',35,'Esquive la prochaine attaque'),
@@ -317,8 +319,6 @@ class ninja(joueur):
     def __init__(self,i,sk):
         super().__init__(i,sk)
         self.lastTurnHide = False
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
         self.ad = self.base_ad
 
     #Se cacher pendant un tour (si dtype != zone)
@@ -384,8 +384,8 @@ class ninja(joueur):
         elif nomduspell == 'attack':
             if self.stamina < self.att_cost:
                 raise NoStamina
-            self.stamina -= self.att_cost
             target = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,target)
         elif nomduspell == 'esquive':
             if self.stamina < 35:
@@ -412,7 +412,7 @@ class mage_noir(joueur):
     att_cost = 50
     staminaMAX = 100
     pvMAX = 100
-    speed = 95
+    basespeed = 95
 
 class mage_blanc(joueur):
     classname = 'mage blanc'
@@ -424,7 +424,7 @@ class mage_blanc(joueur):
     att_cost = 20
     staminaMAX = 100
     pvMAX = 100
-    speed = 115
+    basespeed = 115
     help = [('soin',30,'Soigne la cible de 25 PV'),
             ('reborn',100,'Fait renaitre un joueur mort avec la moitié de sa vie'),
             ('godshield',100,'Bouclier invulnérable d\'un tour sur une cible (Un tour de delai)'),
@@ -432,9 +432,6 @@ class mage_blanc(joueur):
     def __init__(self,i,sk):
         super().__init__(i,sk)
         self.hasDoneGS = False
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
-        self.godshielding = None
 
     def soin(self,tg):
         if not tg.alive:
@@ -498,28 +495,28 @@ class mage_blanc(joueur):
         if nomduspell == 'soin':
             if self.stamina < 30:
                 raise NoStamina
-            self.stamina -= 30
             target = findtarget(self)
+            self.stamina -= 30
             return (1/self.speed,self.soin,self,target)
         elif nomduspell == 'reborn':
             if self.stamina < 100:
                 raise NoStamina
-            self.stamina -= 100
             target = findtarget(self,False)
+            self.stamina -= 100
             return (1/self.speed,self.reborn,self,target)
         elif nomduspell == 'godshield':
             if self.hasDoneGS:
                 raise Spellerror
             if self.stamina < 100:
                 raise NoStamina
-            self.stamina -= 100
             target = findtarget(self)
+            self.stamina -= 100
             return (1/self.speed,self.godshield,self,target)
         elif nomduspell == 'attack':
             if self.stamina < self.att_cost:
                 raise NoStamina
-            self.stamina -= self.att_cost
             target = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,target)
         else:
             raise Spellerror
@@ -537,14 +534,12 @@ class barbare(joueur):
     att_cost = 30
     staminaMAX = 100
     pvMAX = 125
-    speed = 75
+    basespeed = 75
     help = [('passif',0,'le barbare augmente passivement sa force s\'il est frappé'),
             ('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
             ('all_in',40,'augmente l\'attaque au prix de la défense ')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
         self.ad = self.basead
         self.armor = self.basearmor
         self.resistance = self.baseresistance
@@ -601,8 +596,8 @@ class barbare(joueur):
         if nomduspell == 'attack':
             if self.stamina < self.att_cost :
                 raise NoStamina
-            self.stamina -= self.att_cost
             target = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,target)
         elif nomduspell == 'all_in':
             if self.stamina <= 40:
@@ -622,7 +617,7 @@ class yolosaruken(joueur):
     att_cost = 15
     staminaMAX = 100
     pvMAX = 100
-    speed = 100
+    basespeed = 100
     help = [('attack',att_cost,'attaque de base('+str(att_cost)+' Endurance)'),
             ('healmate',100,'Soin de 100PV de soi et d\'un allié aléatoire'),
             ('exodia',100,'1 chance sur 1000 de one-shot un ennemi non insensible aux dégats'),
@@ -630,8 +625,6 @@ class yolosaruken(joueur):
             ('SurpriseMthrFcker',35,'Choisi une cible aléatoire et soit la soigne de 50 PV (50%) soit l\'attaque de 50 (50%)')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
         self.exodia_multiplier = 0
 
     def classestr(self):
@@ -715,8 +708,8 @@ class yolosaruken(joueur):
         if nomduspell == 'attack':
             if self.stamina < self.att_cost:
                 raise NoStamina
-            self.stamina -= self.att_cost
             target = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,target)
         elif nomduspell == 'healmate':
             if self.stamina < 100:
@@ -751,7 +744,7 @@ class barde(joueur):
     att_cost = 30
     staminaMAX = 100
     pvMAX = 110
-    speed = 125
+    basespeed = 125
 
 class mage_rouge(joueur):
     classname = 'mage rouge'
@@ -763,7 +756,7 @@ class mage_rouge(joueur):
     att_cost = 50
     staminaMAX = 100
     pvMAX = 100
-    speed = 100
+    basespeed = 100
     
 class lancier(joueur):
     classname = 'lancier'
@@ -775,15 +768,13 @@ class lancier(joueur):
     att_cost = 30
     staminaMAX = 100
     pvMAX = 125
-    speed = 60
+    basespeed = 60
     help = [('attack',att_cost,'attaque de base'),
             ('jump',40,'saute en l\'air et retombe au tour suivant sur la cible '),
             ('ProPecTorat',40,'Donne un bouclier qui protege d\'une attaque'),
             ('Passif',0,'Ensemble c\'est plus mieux : pv max + 50 si deux lanciers dans la partie')]
     def __init__(self,i,sk):
         super().__init__(i,sk)
-        self.hp = self.pvMAX
-        self.stamina = self.staminaMAX
         self.lastTurnJump = False
     def classestr(self):
         return 'Lancier '+self.name+' a '+str(self.hp)+' PV, une lance et saute très haut'
@@ -800,19 +791,23 @@ class lancier(joueur):
 
     #saut
     def jump(self,target):
+        if self.lastTurnJump:
+            return [('mess',self.name+' a encore essayé de sauter mais il n\'a pas pu')]
         if self.stamina < 40:
             return [('mess', self.name+' n\' a pas la force de sauter : Endurance à '+str(self.stamina))]
         self.jumptarget = target
         self.stamina -= 40
         self.lastTurnJump = True
         self.trigger.addT(self.jumping)
-        self.trigger.addTrRes(0,self.land)
+        self.trigger.addTrRes(0,self.turnland)
         self.trigger.addTrRes(1,self.canjump)
         return [('mess',self.name+' saute très haut')]
     def jumping(self,source,target,amount,dtype):
         return True,[('mess',self.name + ' est en l\'air et évite l\'attaque')]
+    def turnland(self):
+        self.trigger.remTrRes(self.turnland)
+        return [('spell',(1/self.speed,self.land,self))]
     def land(self):
-        self.trigger.remTrRes(self.land)
         self.trigger.remT(self.jumping)
         if not self.jumptarget.alive:
             return [('mess',self.name+' atterit sur '+self.jumptarget.name+' mais il est déjà mort')]
@@ -848,13 +843,11 @@ class lancier(joueur):
     def spell(self,nomduspell,fld):
         global F
         F = fld
-        if nomduspell == 'passif':
-            raise Spellerror
-        elif nomduspell == 'attack':
+        if nomduspell == 'attack':
             if self.stamina < self.att_cost :
                 raise NoStamina
-            self.stamina -= self.att_cost
             target = findtarget(self)
+            self.stamina -= self.att_cost
             return (1/self.speed,self.attack,self,target)
         elif nomduspell == 'ProPecTorat':
             if self.stamina < 40:
@@ -866,8 +859,8 @@ class lancier(joueur):
                 raise Spellerror
             if self.stamina < 40 :
                 raise NoStamina
-            self.stamina -= 40
             target = findtarget(self)
+            self.stamina -= 40
             return (1/self.speed,self.jump,self,target)
         else:
             raise Spellerror
