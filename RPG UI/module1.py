@@ -3,6 +3,7 @@ import time
 import socket
 import pickle
 import sys
+from math import log10
 
 class com(QtCore.QThread):
     commTrigger = QtCore.pyqtSignal(list,name="servercomm")
@@ -320,8 +321,10 @@ class MainWindow(Ui_RPG):
         for a,b in k:
             if a == 'hp':
                 self.HP.setProperty('value',b)
+                self.HP.setGeometry(QtCore.QRect(10, 20, 95 + 7*(int(log10(b))+1), 23))
             elif a == 'stamina' :
                 self.stamina.setProperty('value',b)
+                self.stamina.setGeometry(QtCore.QRect(10, 50, 139 + 7*(int(log10(b))+1), 23))
             elif a == 'name' :
                 self.pseudo.setText("<html><head/><body><p><span style=\" font-size:14pt; font-style:bold;\">"+str(b)+"</span></p></body></html>")
             elif a == 'id' :
