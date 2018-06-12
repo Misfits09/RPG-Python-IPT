@@ -191,7 +191,7 @@ class Ui_RPG(object):
         font.setStrikeOut(False)
         self.chatLog.setFont(font)
         self.chatLog.setStyleSheet("color:white;\n"
-"background-color: rgba(112,112,112,.5);")
+"background-color: rgba(0,0,0,.5);")
         self.chatLog.setObjectName("chatLog")
         self.chatLabel = QtWidgets.QLabel(self.chatFrame)
         self.chatLabel.setGeometry(QtCore.QRect(10, 10, 231, 31))
@@ -207,12 +207,12 @@ class Ui_RPG(object):
         self.chatButton.setGeometry(QtCore.QRect(200, 440, 41, 24))
         self.chatButton.setStyleSheet("border: 2px;\n"
 "border-color: rgb(255, 255, 255);\n"
-"background-color: rgba(112,112,112,.5);")
+"background-color: rgba(0,0,0,.5);")
         self.chatButton.setObjectName("chatButton")
         self.chatBox = QtWidgets.QLineEdit(self.chatFrame)
         self.chatBox.setGeometry(QtCore.QRect(10, 440, 181, 24))
         self.chatBox.setStyleSheet("border:0px;\n"
-"background-color: rgba(112,112,112,.5);")
+"background-color: rgba(0,0,0,.5);")
         self.chatBox.setObjectName("chatBox")
         RPG.setCentralWidget(self.centralwidget)
 
