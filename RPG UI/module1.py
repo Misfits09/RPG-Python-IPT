@@ -27,6 +27,7 @@ class MainWindow(Ui_RPG):
         self.setupUi(frame)
         self.gameFrame.hide()
         self.playeGui.hide()
+        self.ipBOX.setPlaceholderText("Laissez vide pour connection sans IP")
         RPG.setWindowTitle("RPG PRE-ALPHA")
         self.Titre.setText("<html><head/><body><p align=\"center\">RPG - PRE-ALPHA 4.0</p></body></html>")
 
@@ -297,6 +298,7 @@ class MainWindow(Ui_RPG):
         self.entete.setText('Recuperation Pseudo')
         self.connectButton.setText("Valider Pseudo")
         self.labelIP.hide()
+        self.ipBOX.setPlaceholderText("")
         self.labelPort.hide()
         self.comboBox.hide()
         self.connectButton.clicked.disconnect()
