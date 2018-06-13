@@ -27,8 +27,8 @@ class MainWindow(Ui_RPG):
         self.setupUi(frame)
         self.gameFrame.hide()
         self.playeGui.hide()
-        RPG.setWindowTitle("RPG PRE-ALPHA 3.0")
-        self.Titre.setText("<html><head/><body><p align=\"center\">RPG - PRE-ALPHA 3.0</p></body></html>")
+        RPG.setWindowTitle("RPG PRE-ALPHA")
+        self.Titre.setText("<html><head/><body><p align=\"center\">RPG - PRE-ALPHA 4.0</p></body></html>")
 
         self.BoxClass.hide()
         for cl in self.valideClasses:
