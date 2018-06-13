@@ -46,7 +46,7 @@ class MainWindow(Ui_Server):
     
     def __init__(self,frame):
         self.setupUi(frame)
-        version = "RPG PRE-ALPHA 3.0"
+        version = "RPG ALPHA 1.0"
         frame.setWindowTitle(version)
         self.centralwidget.setStyleSheet("background:url(./tel.png)")
         self.Titre.setText("<html><head/><body><p align=\"center\">"+version+"</p></body></html>")
