@@ -49,7 +49,7 @@ class joueur():
     def restore_stamina(self):
         self.stamina = self.staminaMAX
     def turn_speed(self):
-        self.speed = random.gauss(self.basespeed,self.basespeed/8)
+        self.speed = random.gauss(self.basespeed,self.basespeed/5)
     def __str__(self):
         if self.alive:
             return self.classestr()
@@ -118,7 +118,7 @@ class joueur():
                 amount = a
                 commlist += b
             except : pass
-        if dtype == 'physique':    
+        if dtype == 'physique':
             amount = amount*(1 - self.armor)
         elif dtype == 'magique' :
             amount = amount*(1 - self.resistance)

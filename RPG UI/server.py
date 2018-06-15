@@ -172,7 +172,7 @@ class MainWindow(Ui_Server):
             if ms[0] == 'cmd':
                 self.log.emit(j.name+' : '+str(ms[1]))
                 al = ms[1].strip().split()
-                if(al[0] == 'fin'):
+                if al[0] == 'fin':
                     self.send(['mess','Attente des autres joueurs...'],[j])
                     cd = False
                 elif(al[0] == 'spell'):
@@ -228,6 +228,7 @@ class MainWindow(Ui_Server):
                 self.F.nb -= 1
             j.socket.close()
             self.F.player.remove(j)
+            self.signals.spell_end.emit([])
         elif not(ok):
             return None
         else:

@@ -66,8 +66,8 @@ class MainWindow(Ui_RPG):
             self.gameLog.textCursor().deletePreviousChar()
             self.send_updt(['cmd','cancel'])
             self.spellnb -= 1
-            self.cancelSpell.hide()
-            self.endTour.hide()
+            self.cancelSpell.setEnabled(False)
+            self.endTour.setEnabled(False)
             self.spells.setEnabled(False)
     def endTourFct(self):
         self.endTour.hide()
@@ -80,11 +80,13 @@ class MainWindow(Ui_RPG):
         spellname = RPG.sender().text()
         for i in range(len(self.mySpell)):
             if self.mySpell[i][0] == spellname:
+                if self.stamina.value() < self.mySpell[i][1]:
+                    return self.failwith('Pas assez d\'endurance')
+                self.spells.setEnabled(False)
+                self.endTour.setEnabled(False)
+                self.cancelSpell.setEnabled(False)
+                self.send_updt(['cmd','spell '+spellname])
                 break
-        if self.stamina.value() < self.mySpell[i][1]:
-            return self.failwith('Pas assez d\'endurance')
-        self.spells.setEnabled(False)
-        self.send_updt(['cmd','spell '+spellname])
         app.processEvents()
 
     def showHelp(self):
@@ -135,6 +137,8 @@ class MainWindow(Ui_RPG):
         elif a[0] == 'get_c':
             if a[1] == 'main':
                 self.spells.setEnabled(True)
+                self.endTour.setEnabled(True)
+                self.cancelSpell.setEnabled(True)
                 self.endTour.show()
                 if self.spellnb >= 1:
                     self.cancelSpell.show()
@@ -328,10 +332,10 @@ class MainWindow(Ui_RPG):
         for a,b in k:
             if a == 'hp':
                 self.HP.setProperty('value',b)
-                self.HP.setGeometry(QtCore.QRect(10, 20, 95 + 7*(int(log10(b))+1), 23))
+                self.HP.setGeometry(QtCore.QRect(10, 20, 95 + 7*(int(log10(b+b==0))+1), 23))
             elif a == 'stamina' :
                 self.stamina.setProperty('value',b)
-                self.stamina.setGeometry(QtCore.QRect(10, 50, 139 + 7*(int(log10(b))+1), 23))
+                self.stamina.setGeometry(QtCore.QRect(10, 50, 139 + 7*(int(log10(b+b==0))+1), 23))
             elif a == 'name' :
                 self.pseudo.setText("<html><head/><body><p><span style=\" font-size:14pt; font-style:bold;\">"+str(b)+"</span></p></body></html>")
             elif a == 'id' :
